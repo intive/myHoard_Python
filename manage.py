@@ -1,7 +1,6 @@
 from flask import Flask
 from flask.ext.script import Manager
 from flask.ext.mongoengine import MongoEngine
-from myhoard.urls import urls
 import os
 
 
@@ -13,9 +12,10 @@ def create_app():
     # mongoengine
     db = MongoEngine()
     db.init_app(app)
+    # import urls
+    with app.app_context():
+        import myhoard.urls
 
-    # TODO import urls, remove blueprint
-    app.register_blueprint(urls)
     return app
 
 
