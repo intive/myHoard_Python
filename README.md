@@ -9,17 +9,23 @@ myHoard_Python
 
 ``python manage.py runserver --settings=dev``
 
-#### Run parameters
+#### Environment variable
 
-``--settings=dev``
-``--settings=prod``
-``--settings=test``
+``MYHOARD_SETTINGS_MODULE``
 
-#### tree
+##### Values
+
+``myhoard.settings.dev``
+
+``myhoard.settings.prod``
+
+``myhoard.settings.test``
+
+#### Tree
 
 ```
 .
-├── my_hoard
+├── myhoard
 │   ├── apps
 │   │   ├── auth
 │   │   │   ├── __init__.py
@@ -41,10 +47,6 @@ myHoard_Python
 │   │   ├── __init__.py
 │   │   ├── prod.py
 │   │   └── test.py
-│   ├── templates
-│   │   └── apps
-│   │       ├── auth
-│   │       └── collections
 │   ├── __init__.py
 │   └── urls.py
 ├── LICENSE
