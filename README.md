@@ -7,7 +7,7 @@ myHoard_Python
 
 ### Run:
 
-``python manage.py runserver --settings=dev``
+``python manage.py runserver``
 
 #### Environment variable
 
