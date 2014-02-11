@@ -1,7 +1,8 @@
 from flask.ext.restful import Api
 from flask import current_app
+
 from myhoard.apps.collections.views import Collections, demo
-from myhoard.apps.auth.views import Users
+from myhoard.apps.users.views import Users
 
 
 # register the urls
