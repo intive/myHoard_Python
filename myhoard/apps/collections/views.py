@@ -14,7 +14,7 @@ class Collections(Resource):
     def put(self):
         pass
 
-    def delete(self, slug):
+    def delete(self):
         pass
 
 
