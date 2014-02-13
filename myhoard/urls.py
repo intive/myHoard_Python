@@ -1,6 +1,6 @@
 from flask import current_app
 
-from myhoard.apps.collections.views import Collections, demo
+from myhoard.apps.collections.views import Collections, CollectionsList, demo
 from myhoard.apps.auth.views import Users
 
 
@@ -8,5 +8,6 @@ from myhoard.apps.auth.views import Users
 current_app.add_url_rule('/', view_func=demo)
 
 # restful api
-current_app.api.add_resource(Collections, '/collections/')
+current_app.api.add_resource(Collections, '/collections/<string:id>/')
+current_app.api.add_resource(CollectionsList, '/collections/')
 current_app.api.add_resource(Users, '/users/')
