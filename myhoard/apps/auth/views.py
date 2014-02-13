@@ -1,4 +1,4 @@
-from flask.ext.restful import Api, Resource
+from flask.ext.restful import Resource
 
 
 class Users(Resource):
@@ -14,5 +14,5 @@ class Users(Resource):
     def put(self):
         pass
 
-    def delete(self, slug):
+    def delete(self):
         pass

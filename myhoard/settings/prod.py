@@ -4,7 +4,7 @@ DEBUG = False
 MONGODB_SETTINGS = {
     'HOST': '127.0.0.1',
     'PORT': 27017,
-    'DB': 'myhoard_prod',
+    'DB': 'myhoard',
     'USERNAME': 'myhoard',
-    'PASSWORD': 'myh0@rd',
+    'PASSWORD': 'myhoard',
 }

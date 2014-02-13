@@ -5,21 +5,23 @@ myHoard_Python
 
  ``pip install -r requirements.txt``
 
-### Run:
-
-``python manage.py runserver``
-
 #### Environment variable
 
 ``MYHOARD_SETTINGS_MODULE``
 
-##### Values
-
-``myhoard.settings.dev``
+###### Values
 
 ``myhoard.settings.prod``
 
+``myhoard.settings.dev``
+
 ``myhoard.settings.test``
+
+### Run:
+
+``python manage.py runserver``
+
+
 
 #### Tree
 

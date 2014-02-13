@@ -10,7 +10,7 @@ def create_app():
 
     # settings
     settings_module = os.environ.get('MYHOARD_SETTINGS_MODULE')
-    if settings_module is None:
+    if not settings_module:
         raise EnvironmentError("Could not import settings, MYHOARD_SETTINGS_MODULE is None")
     app.config.from_object(settings_module)
 

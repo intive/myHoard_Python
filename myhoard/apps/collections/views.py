@@ -1,4 +1,4 @@
-from flask.ext.restful import Api, Resource
+from flask.ext.restful import Resource
 
 
 class Collections(Resource):
