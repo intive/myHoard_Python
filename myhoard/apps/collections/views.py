@@ -1,64 +1,101 @@
-from flask.ext.restful import Resource, marshal_with, fields
+from flask.ext.restful import Resource, marshal_with, marshal, fields
 from flask import request
 from datetime import datetime
-from models import Collection
+from mongoengine import ValidationError
+import time
 
+from models import Collection
+from parsers import CollectionForm
+
+# collection marshal fields
 collection_fields = {
     'id': fields.String,
     'name': fields.String,
     'description': fields.String,
-    'tags': fields.String,
+    'tags': fields.List(fields.String),
     'items_number': fields.Integer,
     'created_date': fields.String,
     'modified_date': fields.String,
     'owner': fields.String
 }
 
+# errors marshal fields
+error_fields = {
+    'error_code': fields.Integer,
+    'errors': fields.Raw
+}
+
 # TODO authorization
-# TODO validation
 class Collections(Resource):
-    def __init__(self):
-        super(Collections, self).__init__()
-
-    @marshal_with(collection_fields)
     def get(self, id):
-        # TODO 404 if collection not exist
-        return Collection.objects.get(id=id)
+        try:
+            collection = Collection.objects.get(id=id)
+        except ValidationError, ve:
+            response = {'error_code': 404, 'errors': {'collection': str(ve)}}
+            return marshal(response, error_fields), 404
+        return marshal(collection, collection_fields)
 
-    def put(self):
-        pass
+    # TODO validation
+    def put(self, id):
+        try:
+            collection = Collection.objects.get(id=id)
+        except ValidationError, ve:
+            response = {'error_code': 404, 'errors': {'collection': str(ve)}}
+            return marshal(response, error_fields), 404
+        # create validation form from json request
+        form = CollectionForm.from_json(request.json)
+        if form.validate():
+            form.populate_obj(collection)
+            collection.modified_date = getCurrentTime()
+            collection.save()
+            return marshal(collection, collection_fields)
+        else:
+            response = {"error_code": 400, "errors": form.errors}
+            return marshal(response, error_fields), 400
+
 
     def delete(self, id):
-        collection = Collection.objects.get(id=id)
+        try:
+            collection = Collection.objects.get(id=id)
+        except ValidationError, ve:
+            response = {'error_code': 404, 'errors': {'collection': str(ve)}}
+            return marshal(response, error_fields), 404
         collection.delete()
-        # TODO 404 if collection not exist
         return '', 204
 
-# TODO authorization
-# TODO validation
-class CollectionsList(Resource):
-    def __init__(self):
-        super(CollectionsList, self).__init__()
 
-    @marshal_with(collection_fields)
+# TODO authorization
+class CollectionsList(Resource):
     def post(self):
-        collection = Collection(
-            name=request.json['name'],
-            description=request.json['description'],
-            tags=request.json['tags'],
-            # TODO get/set items_number
-            items_number=0,
-            created_date=str(datetime.now().isoformat()),
-            modified_date=str(datetime.now().isoformat()),
-            # TODO get owner
-            owner="TODO owner"
-        )
-        collection.save()
-        return collection, 201
+        # create validation form from json request
+        form = CollectionForm.from_json(request.json)
+        if form.validate():
+            collection = Collection(
+                name=form.name.data,
+                description=form.description.data,
+                tags=form.tags.data,
+                # TODO get/set items_number
+                items_number=0,
+                created_date=getCurrentTime(),
+                modified_date=getCurrentTime(),
+                # TODO get owner
+                owner="TODO owner"
+            )
+            collection.save()
+            return marshal(collection, collection_fields)
+        else:
+            response = {"error_code": 400, "errors": form.errors}
+            return marshal(response, error_fields), 400
 
     @marshal_with(collection_fields)
     def get(self):
         return list(Collection.objects)
+
+
+def getCurrentTime():
+    time_zone = str.format('{0:+06.2f}', -float(time.timezone) / 3600)
+    datetime_now = "%s%s" % (datetime.now().isoformat(), time_zone)
+    return datetime_now
 
 
 def demo():
