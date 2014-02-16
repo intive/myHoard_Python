@@ -1,18 +1,18 @@
-from flask.ext.restful import Resource
+from flask.ext.restful import Resource, fields, marshal_with
+
+from models import User
+from myhoard.apps.common.utils import custom_errors, get_request_json
+
+user_fields = {
+    'username': fields.String,
+    'email': fields.String,
+}
 
 
 class Users(Resource):
-    def __init__(self):
-        super(Users, self).__init__()
+    method_decorators = [marshal_with(user_fields), custom_errors]
 
     def post(self):
-        pass
-
-    def get(self):
-        pass
-
-    def put(self):
-        pass
-
-    def delete(self):
-        pass
+        user = User(**get_request_json())
+        user.save()
+        return user, 201
