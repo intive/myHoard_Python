@@ -22,7 +22,7 @@ def custom_errors(f):
                 400,
                 e.to_dict(),
             )
-        except NotUniqueError as e:
+        except NotUniqueError:
             return make_formated_response(
                 current_app.config['ERROR_CODE_DUPLICATE'],
                 400,
