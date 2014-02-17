@@ -1,10 +1,9 @@
+from flask import current_app
 from mongoengine import ValidationError, NotUniqueError
-
-import errors
 
 
 def custom_errors(f):
-    def make(code, errors=None):
+    def make_formated_response(code, errors=None):
         resp = {
             'error_code': code,
         }
@@ -18,13 +17,13 @@ def custom_errors(f):
         try:
             return f(*args, **kwargs)
         except ValidationError as e:
-            return make(
-                errors.validation_error_code,
+            return make_formated_response(
+                current_app.config['ERROR_CODE_VALIDATION'],
                 e.to_dict(),
             )
         except NotUniqueError:
-            return make(
-                errors.duplicate_error_code,
+            return make_formated_response(
+                current_app.config['ERROR_CODE_DUPLICATE'],
             )
 
     return wrapper
