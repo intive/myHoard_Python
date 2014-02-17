@@ -16,6 +16,6 @@ class Users(Resource):
 
     def post(self):
         user = User(**get_request_json())
-        user['password'] = generate_password_hash(user['password'])
+        user.password = generate_password_hash(user.password)
         user.save()
         return user, 201

@@ -1,6 +1,6 @@
 from flask import current_app
 
-from myhoard.apps.collections.views import Collections
+from myhoard.apps.collections.views import Collections, CollectionsList
 from myhoard.apps.auth.views import Users
 from myhoard.apps.auth.oauth.views import oauth
 

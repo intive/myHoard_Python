@@ -1,11 +1,9 @@
 from flask.ext.restful import Resource, marshal_with, marshal, fields
-from flask import request
 from datetime import datetime
-from mongoengine import ValidationError
-import time
-
+from myhoard.apps.common.decorators import custom_errors
+from myhoard.apps.common.utils import get_request_json
 from models import Collection
-from parsers import CollectionForm
+import time
 
 # collection marshal fields
 collection_fields = {
@@ -19,84 +17,49 @@ collection_fields = {
     'owner': fields.String
 }
 
-# errors marshal fields
-error_fields = {
-    'error_code': fields.Integer,
-    'errors': fields.Raw
-}
-
 # TODO authorization
 class Collections(Resource):
+    method_decorators = [marshal_with(collection_fields), custom_errors]
+
     def get(self, id):
-        try:
-            collection = Collection.objects.get(id=id)
-        except ValidationError, ve:
-            response = {'error_code': 404, 'errors': {'collection': str(ve)}}
-            return marshal(response, error_fields), 404
-        return marshal(collection, collection_fields)
+        collection = Collection.objects.get(id=id)
+        return collection
 
-    # TODO validation
     def put(self, id):
-        try:
-            collection = Collection.objects.get(id=id)
-        except ValidationError, ve:
-            response = {'error_code': 404, 'errors': {'collection': str(ve)}}
-            return marshal(response, error_fields), 404
-        # create validation form from json request
-        form = CollectionForm.from_json(request.json)
-        if form.validate():
-            form.populate_obj(collection)
-            collection.modified_date = getCurrentTime()
-            collection.save()
-            return marshal(collection, collection_fields)
-        else:
-            response = {"error_code": 400, "errors": form.errors}
-            return marshal(response, error_fields), 400
-
+        collection = Collection.objects.get(id=id)
+        update_collection = Collection(**get_request_json())
+        collection.name = update_collection.name
+        collection.description = update_collection.description
+        collection.tags = update_collection.tags
+        collection.modified_date = get_datetime()
+        collection.save()
+        return collection
 
     def delete(self, id):
-        try:
-            collection = Collection.objects.get(id=id)
-        except ValidationError, ve:
-            response = {'error_code': 404, 'errors': {'collection': str(ve)}}
-            return marshal(response, error_fields), 404
+        collection = Collection.objects.get(id=id)
         collection.delete()
         return '', 204
 
 
 # TODO authorization
 class CollectionsList(Resource):
+    method_decorators = [marshal_with(collection_fields), custom_errors]
+
     def post(self):
-        # create validation form from json request
-        form = CollectionForm.from_json(request.json)
-        if form.validate():
-            collection = Collection(
-                name=form.name.data,
-                description=form.description.data,
-                tags=form.tags.data,
-                # TODO get/set items_number
-                items_number=0,
-                created_date=getCurrentTime(),
-                modified_date=getCurrentTime(),
-                # TODO get owner
-                owner="TODO owner"
-            )
-            collection.save()
-            return marshal(collection, collection_fields)
-        else:
-            response = {"error_code": 400, "errors": form.errors}
-            return marshal(response, error_fields), 400
+        collection = Collection(**get_request_json())
+        collection.created_date = get_datetime()
+        collection.modified_date = get_datetime()
+        # TODO get owner
+        collection.owner = "TODO owner"
+        collection.save()
+        return collection, 201
+
 
     @marshal_with(collection_fields)
     def get(self):
         return list(Collection.objects)
 
-
-def getCurrentTime():
+# return current date and time zone, format Y-m-dTH:M:S+HH:MM
+def get_datetime():
     time_zone = str.format('{0:+06.2f}', -float(time.timezone) / 3600)
-    datetime_now = "%s%s" % (datetime.now().isoformat(), time_zone)
-    return datetime_now
-
-
-def demo():
-    return "demo"
+    return "%s%s" % (datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), time_zone)
