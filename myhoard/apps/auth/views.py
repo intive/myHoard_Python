@@ -1,13 +1,13 @@
 from flask.ext.restful import Resource, fields, marshal_with
 
 from models import User
-from myhoard.apps.common.utils import custom_errors, get_request_json
-from myhoard.apps.common.security import generate_password_hash
+from myhoard.apps.common.decorators import custom_errors
+from myhoard.apps.common.utils import get_request_json
+from myhoard.apps.auth.oauth.utils import generate_password_hash
 
 user_fields = {
     'username': fields.String,
     'email': fields.String,
-    'password': fields.String,
 }
 
 
