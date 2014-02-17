@@ -55,11 +55,9 @@ class CollectionsList(Resource):
         return collection, 201
 
 
-    @marshal_with(collection_fields)
     def get(self):
         return list(Collection.objects)
 
 # return current date and time zone, format Y-m-dTH:M:S+HH:MM
 def get_datetime():
-    time_zone = str.format('{0:+06.2f}', -float(time.timezone) / 3600)
-    return "%s%s" % (datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), time_zone)
+    return str.format('{0}{1:+06.2f}', datetime.now().strftime('%Y-%m-%dT%H:%M:%S'), -float(time.timezone) / 3600)
