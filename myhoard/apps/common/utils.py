@@ -1,7 +1,7 @@
 from flask import request
 from mongoengine import ValidationError, NotUniqueError
 
-from myhoard.apps.common import errors
+import errors
 
 
 def custom_errors(f):
