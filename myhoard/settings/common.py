@@ -1,2 +1,6 @@
 DEBUG = False
 TESTING = False
+
+# Custom error codes
+ERROR_CODE_VALIDATION = 100
+ERROR_CODE_DUPLICATE = 101
