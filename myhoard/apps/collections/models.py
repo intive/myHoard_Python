@@ -1,4 +1,5 @@
-from mongoengine import Document, StringField, ListField, IntField
+from mongoengine import Document, StringField, ListField, IntField, \
+    ObjectIdField
 
 
 class Collection(Document):
@@ -8,4 +9,4 @@ class Collection(Document):
     items_number = IntField(min_value=0)
     created_date = StringField()
     modified_date = StringField()
-    owner = StringField()
+    owner = ObjectIdField()
