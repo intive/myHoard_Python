@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div>
+        <br>
+
+        <h3>API endpoints</h3>
+        <br>
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <th>Endpoint</th>
+                    <th>Path</th>
+                    <th>HTTP methods</th>
+                </thead>
+                <tbody>
+                {% for link in links %}
+                    <tr>
+                        <td>{{ link[0] }}</td>
+                        <td>{{ link[1] }}</td>
+                        <td>{{ link[2] }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

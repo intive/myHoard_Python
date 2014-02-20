@@ -36,3 +36,6 @@ nosetests.xml
 .pydevproject
 
 .idea/
+
+# local settings should not be in repo
+local.py

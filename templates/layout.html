@@ -1,0 +1,15 @@
+<!doctype html>
+<head>
+    <title>myHoard: Patronage 2014</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap-theme.min.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+</head>
+<body>
+<div class="page">
+    <div class="container">
+        <h1>myHoard <small>Patronage 2014</small></h1>
+        {% block body %}{% endblock %}
+    </div>
+</div>
+</body>
