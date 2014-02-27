@@ -13,4 +13,3 @@ mongoengine==0.8.7
 pymongo==2.6.3
 pytz==2013.9
 six==1.5.2
-WTForms-JSON==0.2.5

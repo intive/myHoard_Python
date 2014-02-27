@@ -6,7 +6,6 @@ from myhoard.apps.common.decorators import custom_errors, login_required
 from myhoard.apps.common.utils import get_request_json
 
 from datetime import datetime
-import time
 
 # collection marshal fields
 collection_fields = {
@@ -36,7 +35,7 @@ class Collections(Resource):
         collection.name = update_collection.name
         collection.description = update_collection.description
         collection.tags = update_collection.tags
-        collection.modified_date = get_datetime()
+        collection.modified_date = datetime.now()
         collection.save()
 
         return collection
@@ -54,20 +53,12 @@ class CollectionsList(Resource):
 
     def post(self):
         collection = Collection(**get_request_json())
-        collection.created_date = get_datetime()
-        collection.modified_date = get_datetime()
         collection.owner = g.user
+        collection.created_date = datetime.now()
+        collection.modified_date = datetime.now()
         collection.save()
 
         return collection, 201
 
     def get(self):
         return list(Collection.objects)
-
-
-# return current date and time zone, format Y-m-dTH:M:S+HH:MM
-def get_datetime():
-    return '{}{:+06.2f}'.format(
-        datetime.now().strftime('%Y-%m-%dT%H:%M:%S'),
-        -float(time.timezone) / 360,
-    )
