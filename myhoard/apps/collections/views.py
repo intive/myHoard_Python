@@ -1,13 +1,14 @@
-from flask import g
-from flask.ext.restful import Resource, marshal_with, fields
-
-from models import Collection
-from myhoard.apps.common.decorators import custom_errors, login_required
-from myhoard.apps.common.utils import get_request_json
-
 from datetime import datetime
 
-# collection marshal fields
+from flask import g, request
+from flask.ext.restful import Resource, marshal_with, fields
+
+from myhoard.apps.common.decorators import custom_errors
+from myhoard.apps.common.utils import get_request_json
+from myhoard.apps.auth.decorators import login_required
+
+from models import Collection
+
 collection_fields = {
     'id': fields.String,
     'name': fields.String,

@@ -1,5 +1,11 @@
 from flask import request
 
+from myhoard.apps.common.errors import JSONError
+
 
 def get_request_json():
-    return request.get_json(force=True, silent=True) or {}
+    json = request.get_json(silent=True)
+    if not json:
+        raise JSONError()
+
+    return json

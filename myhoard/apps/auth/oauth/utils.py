@@ -1,6 +1,4 @@
-from werkzeug.security import generate_password_hash as gph
-from werkzeug.security import check_password_hash as cph
-from flask import current_app, g
+from flask import g
 from mongoengine import DoesNotExist
 
 from myhoard.apps.common.errors import AuthError
@@ -8,20 +6,21 @@ from myhoard.apps.common.errors import AuthError
 from models import Token
 
 
-def generate_password_hash(password):
-    return gph(password)
+def check(req):
+    return bool(req.headers.get('Authorization'))
 
 
-def check_password_hash(hash, password):
-    return cph(hash, password)
-
-
-def check_token(token):
+def handle(req):
     try:
-        token = Token.objects.get(access_token=token)
-    except (ValueError, DoesNotExist):
+        token = Token.objects.get(access_token=req.headers.get('Authorization'))
+    except ValueError:
         raise AuthError(
-            current_app.config['ERROR_CODE_AUTH_REQUIRED'],
+            'ERROR_CODE_AUTH_BAD_PROVIDED',
+            http_code=401,
+        )
+    except DoesNotExist:
+        raise AuthError(
+            'ERROR_CODE_AUTH_FAILED',
             http_code=403,
         )
 
