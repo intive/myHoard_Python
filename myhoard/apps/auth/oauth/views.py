@@ -1,14 +1,14 @@
 from uuid import uuid4
 
-from flask import request, current_app, g
+from werkzeug.security import check_password_hash
+from flask import request, current_app
 from mongoengine import DoesNotExist
 
 from myhoard.apps.auth.models import User
-from myhoard.apps.common.decorators import login_required, json_response, \
-    custom_errors
+from myhoard.apps.auth.decorators import login_required
+from myhoard.apps.common.decorators import json_response, custom_errors
 from myhoard.apps.common.errors import AuthError
 
-from utils import check_password_hash
 from models import Token
 
 
@@ -16,22 +16,20 @@ def create_token(**kwargs):
     try:
         user = User.objects.get(username=kwargs.get('username', ''))
     except DoesNotExist:
-        raise AuthError(current_app.config['ERROR_CODE_AUTH_FAILED'])
+        raise AuthError('ERROR_CODE_AUTH_FAILED')
 
     if not check_password_hash(user.password, kwargs.get('password', '')):
-        raise AuthError(current_app.config['ERROR_CODE_AUTH_FAILED'])
+        raise AuthError('ERROR_CODE_AUTH_FAILED')
 
     token = Token(
         access_token=uuid4(),
         refresh_token=uuid4(),
         user=user.id,
-        scope='read+write',
     )
     token.save()
 
     return {
                'access_token': token.access_token,
-               'scope': token.scope,
                'expires_in': current_app.config['AUTH_KEEP_ALIVE_TIME'],
                'refresh_token': token.refresh_token,
            }, 200
@@ -43,7 +41,7 @@ def refresh_token(**kwargs):
         token = Token.objects.get(refresh_token=kwargs.get('refresh_token', ''))
     except (ValueError, DoesNotExist):
         raise AuthError(
-            current_app.config['ERROR_CODE_AUTH_FAILED'],
+            'ERROR_CODE_AUTH_FAILED',
         )
 
     token.access_token = uuid4()
@@ -53,7 +51,6 @@ def refresh_token(**kwargs):
 
     return {
                'access_token': token.access_token,
-               'scope': token.scope,
                'expires_in': current_app.config['AUTH_KEEP_ALIVE_TIME'],
                'refresh_token': token.refresh_token,
            }, 200
@@ -70,6 +67,6 @@ def oauth():
         return refresh_token(**args)
     else:
         raise AuthError(
-            current_app.config.get('ERROR_CODE_AUTH'),
+            'ERROR_CODE_AUTH',
             errors={'grant_type': 'Unsupported grant_type'},
         )

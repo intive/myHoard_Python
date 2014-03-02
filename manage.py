@@ -1,8 +1,9 @@
+import os
+
 from flask import Flask
 from flask.ext.script import Manager
 from flask.ext.mongoengine import MongoEngine
 from flask.ext.restful import Api
-import os
 
 
 def create_app():

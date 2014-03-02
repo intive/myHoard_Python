@@ -1,6 +1,7 @@
+from datetime import datetime
+
 from mongoengine import Document, StringField, ListField, IntField, \
     ObjectIdField, DateTimeField
-from datetime import datetime
 
 
 class Collection(Document):
