@@ -56,7 +56,7 @@ def custom_errors(f):
                 errors=e.errors,
                 http_code=e.http_code,
             )
-        # raised when trying to try get Object with an invalid id.
+        # raised when trying to get Object with an invalid id.
         except InvalidId as e:
             return make_formatted_response(
                 'ERROR_CODE_NOT_EXIST',

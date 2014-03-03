@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import g, current_app
+from flask import g, url_for
 from flask.ext.restful import Resource, marshal_with, fields
 
 from myhoard.apps.common.decorators import custom_errors
@@ -17,8 +17,9 @@ class GeoLocationField(fields.Raw):
 
 # custom media field
 class MediaField(fields.Raw):
-    def format(self, id):
-        return {'id': str(id), 'url': '%s/media/%s/' % (current_app.config['URL_SERVER'], str(id))}
+    def format(self, media_id):
+        # TODO change items -> media
+        return {'id': str(media_id), 'url': url_for('items', id=media_id, _external=True)}
 
 # item marshal fields
 item_fields = {

@@ -8,5 +8,3 @@ MONGODB_SETTINGS = {
     'USERNAME': 'myhoard',
     'PASSWORD': 'myh0@rd',
 }
-
-URL_SERVER = 'http://127.0.0.1:5000'
