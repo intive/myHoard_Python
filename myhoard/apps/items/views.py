@@ -1,54 +1,81 @@
+from datetime import datetime
+
+from flask import g, current_app
 from flask.ext.restful import Resource, marshal_with, fields
-from myhoard.apps.common.decorators import custom_errors, login_required
 
-# TODO geolocation marshal fields
-location_fields = {
-    'lat': fields.Float(attribute='lat'),
-    'lng': fields.Float(attribute='lng')
-}
+from myhoard.apps.common.decorators import custom_errors
+from myhoard.apps.common.utils import get_request_json
+from myhoard.apps.auth.decorators import login_required
+from models import Item
 
-# TODO media marshal fields
-media_fields = {
-    'id': fields.String(attribute='id'),
-    'url': fields.String(attribute='url')
-}
+
+# custom geo location field
+class GeoLocationField(fields.Raw):
+    def format(self, point):
+        return {'lat': point[0], 'lng': point[1]}
+
+
+# custom media field
+class MediaField(fields.Raw):
+    def format(self, id):
+        return {'id': str(id), 'url': '%s/media/%s/' % (current_app.config['URL_SERVER'], str(id))}
 
 # item marshal fields
 item_fields = {
     'id': fields.String,
     'name': fields.String,
     'description': fields.String,
-    'location': fields.Nested(location_fields),
+    'location': GeoLocationField(),
     'quantity': fields.Integer,
-    'media': fields.List(fields.Nested(media_fields)), # TODO media objects list
+    'media': fields.List(MediaField()),
     'created_date': fields.String,
     'modified_date': fields.String,
     'collection': fields.String,
     'owner': fields.String
 }
 
-# TODO
+
 class Items(Resource):
-    method_decorators = [marshal_with(item_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(item_fields), login_required, custom_errors]
 
     def get(self, id):
-        pass
+        item = Item.objects.get(id=id)
+
+        return item
 
     def put(self, id):
-        pass
+        item = Item.objects.get(id=id)
+        update_item = Item(**get_request_json())
+        item.name = update_item.name
+        item.description = update_item.description
+        item.quantity = update_item.quantity
+        item.location = (update_item.location['lat'], update_item.location['lng'])
+        item.collection = update_item.collection
+        item.media = update_item.media
+        item.modified_date = datetime.now()
+        item.save()
+
+        return item
 
     def delete(self, id):
-        pass
+        item = Item.objects.get(id=id)
+        item.delete()
 
-# TODO
+        return '', 204
+
+
 class ItemsList(Resource):
-    method_decorators = [marshal_with(item_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(item_fields), login_required, custom_errors]
 
     def post(self):
-        # TODO set collection fk to all media objects
-        pass
+        item = Item(**get_request_json())
+        item.owner = g.user
+        item.created_date = datetime.now()
+        item.modified_date = datetime.now()
+        item.location = (item.location['lat'], item.location['lng'])
+        item.save()
+
+        return item, 201
 
     def get(self):
-        return {}
+        return list(Item.objects)

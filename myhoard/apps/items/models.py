@@ -10,7 +10,6 @@ class Item(Document):
     quantity = IntField(min_value=0)
     created_date = DateTimeField(default=datetime.now())
     modified_date = DateTimeField(default=datetime.now())
-    # TODO this list should contain media objects
-    media = ListField()
+    media = ListField(ObjectIdField())
     collection = ObjectIdField()
     owner = ObjectIdField()

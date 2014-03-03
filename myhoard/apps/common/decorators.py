@@ -2,6 +2,7 @@ from functools import wraps
 
 from flask import current_app, jsonify
 from mongoengine import ValidationError, NotUniqueError, DoesNotExist
+from bson.errors import InvalidId
 
 from myhoard.apps.common.errors import JSONError, AuthError
 
@@ -54,6 +55,13 @@ def custom_errors(f):
                 e.error_code,
                 errors=e.errors,
                 http_code=e.http_code,
+            )
+        # raised when trying to try get Object with an invalid id.
+        except InvalidId as e:
+            return make_formatted_response(
+                'ERROR_CODE_NOT_EXIST',
+                errors={'ObjectId': str(e)},
+                http_code=404,
             )
 
     return wrapper

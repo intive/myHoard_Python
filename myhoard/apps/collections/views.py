@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import g, request
+from flask import g
 from flask.ext.restful import Resource, marshal_with, fields
 
 from myhoard.apps.common.decorators import custom_errors
@@ -22,8 +22,7 @@ collection_fields = {
 
 
 class Collections(Resource):
-    method_decorators = [marshal_with(collection_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
 
     def get(self, id):
         collection = Collection.objects.get(id=id)
@@ -49,8 +48,7 @@ class Collections(Resource):
 
 
 class CollectionsList(Resource):
-    method_decorators = [marshal_with(collection_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
 
     def post(self):
         collection = Collection(**get_request_json())
