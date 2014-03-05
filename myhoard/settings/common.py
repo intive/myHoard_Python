@@ -5,7 +5,11 @@ TESTING = False
 # Auth
 AUTH_KEEP_ALIVE_TIME = 300
 
+# Image
+IMAGE_THUMBNAIL = (32, 32, True)  # w, h, fill_mode:true | scale_mode: false
+
 # Custom error codes
+ERROR_CODE_NO_INCOMING_FILE_DATA = 98
 ERROR_CODE_NO_INCOMING_JSON_DATA = 99
 
 ERROR_CODE_VALIDATION = 100

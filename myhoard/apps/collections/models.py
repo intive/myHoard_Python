@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from mongoengine import Document, StringField, ListField, IntField, \
     ObjectIdField, DateTimeField
 
@@ -9,6 +7,6 @@ class Collection(Document):
     description = StringField(min_length=3, max_length=50, required=True)
     tags = ListField(StringField(min_length=3, max_length=10))
     items_number = IntField(min_value=0)
-    created_date = DateTimeField(default=datetime.now())
-    modified_date = DateTimeField(default=datetime.now())
+    created_date = DateTimeField()
+    modified_date = DateTimeField()
     owner = ObjectIdField()

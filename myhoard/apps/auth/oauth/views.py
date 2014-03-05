@@ -61,6 +61,12 @@ def refresh_token(**kwargs):
 def oauth():
     args = request.form.to_dict()
 
+    if 'grant_type' not in args:
+        raise AuthError(
+            'ERROR_CODE_AUTH',
+            errors={'grant_type': 'Field is required'}
+        )
+
     if args.get('grant_type') == 'password':
         return create_token(**args)
     elif args.get('grant_type') == 'refresh_token':
