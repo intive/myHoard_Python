@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import g
+from flask import g, request
 from flask.ext.restful import Resource, marshal_with, fields
 
 from myhoard.apps.common.decorators import custom_errors
@@ -17,7 +17,7 @@ collection_fields = {
     'items_number': fields.Integer,
     'created_date': fields.String,
     'modified_date': fields.String,
-    'owner': fields.String
+    'owner': fields.String,
 }
 
 
@@ -60,4 +60,21 @@ class CollectionsList(Resource):
         return collection, 201
 
     def get(self):
-        return list(Collection.objects)
+        # TODO sort
+        sort_by = request.values.getlist('sort_by')
+        sort_direction = request.values.get('sort_direction')
+        #geo = request.values.get('geo')
+
+        # order direction + == asc, - == desc
+        try:
+            dir = {'asc': '+', 'desc': '-'}[sort_direction]
+        except KeyError:
+            dir = '+'
+
+        # setting direction sorting elements
+        order_by = [dir + s for s in sort_by]
+
+        # sorting
+        sorted_collections = Collection.objects.order_by(*order_by)
+
+        return list(sorted_collections)
