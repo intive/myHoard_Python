@@ -6,7 +6,7 @@ from flask.ext.restful import Resource, marshal_with, fields
 from myhoard.apps.common.decorators import custom_errors
 from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
-from models import Item
+from myhoard.apps.collections.items.models import Item
 
 
 # custom geo location field
