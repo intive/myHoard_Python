@@ -4,9 +4,9 @@ import manage
 
 __author__ = 'mkr'
 
-app = manage.create_app()
+myhoard = manage.create_app()
 
-app.wsgi_app = ProxyFix(app.wsgi_app)
+myhoard.wsgi_app = ProxyFix(myhoard.wsgi_app)
 
 if __name__ == '__main__':
-    app.run()
+    myhoard.run()
