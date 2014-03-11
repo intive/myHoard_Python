@@ -1,6 +1,11 @@
 myHoard_Python
 ==============
 
+### Prerequisites:
+
+Requires the Pillow library
+``http://pillow.readthedocs.org/en/latest/installation.html#linux-installation``
+
 ### Requirements:
 
  ``pip install -r requirements.txt``
