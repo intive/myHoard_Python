@@ -39,3 +39,6 @@ curl -H "Accept: application/json" -H "Content-type: application/json" -H "Autho
 
 ## create a new collection
 curl -H "Accept: application/json" -H "Content-type: application/json" -H "Authorization: 192aac84-5a65-409b-901b-e10d9faa4509" -d '{"name": "Kolekcja testowa", "description": "Opis testowy"}' -X POST http://localhost:5000/collections/
+
+## delete an existing collection
+curl -H "Accept: application/json" -H "Content-type: application/json" -H "Authorization: 192aac84-5a65-409b-901b-e10d9faa4509" -X DELETE http://localhost:5000/collections/53204494d783dc422eb48d1c
