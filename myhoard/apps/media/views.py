@@ -5,10 +5,10 @@ from flask.ext.restful import Resource, marshal_with, fields, request
 
 from myhoard.apps.common.errors import FileError
 from myhoard.apps.common.decorators import custom_errors
-from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
 
 from models import Medium
+from utils import check_image_file
 
 media_fields = {
     'id': fields.String,
@@ -33,17 +33,24 @@ class Media(Resource):
     def put(self, id):
         medium = Medium.objects.get(id=id)
 
-        args = get_request_json()
-        for key, value in args.items():
-            setattr(medium, key, value)
+        if 'image' not in request.files:
+            raise FileError(
+                'ERROR_CODE_NO_INCOMING_FILE_DATA',
+                errors={'image': 'Field is required'}
+            )
 
-        medium.created_date = datetime.now()
+        image = request.files['image']
+        check_image_file(image)
+
+        medium.image.delete()
+        medium.image = image
         medium.save()
 
         return medium
 
     def delete(self, id):
         medium = Medium.objects.get(id=id)
+        medium.image.delete()
         medium.delete()
 
         return '', 204
@@ -57,10 +64,13 @@ class MediaList(Resource):
         if 'image' not in request.files:
             raise FileError(
                 'ERROR_CODE_NO_INCOMING_FILE_DATA',
-                errors={'file': 'Field is required'}
+                errors={'image': 'Field is required'}
             )
 
-        medium = Medium(image=request.files['image'])
+        image = request.files['image']
+        check_image_file(image)
+
+        medium = Medium(image=image)
         medium.created_date = datetime.now()
         medium.save()
 

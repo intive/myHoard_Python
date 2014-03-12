@@ -14,7 +14,7 @@ collection_fields = {
     'name': fields.String,
     'description': fields.String,
     'tags': fields.List(fields.String),
-    'items_number': fields.Integer,
+    'items_count': fields.Integer,
     'created_date': fields.String,
     'modified_date': fields.String,
     'owner': fields.String
@@ -52,6 +52,7 @@ class CollectionsList(Resource):
 
     def post(self):
         collection = Collection(**get_request_json())
+        collection.items_count = 0
         collection.owner = g.user
         collection.created_date = datetime.now()
         collection.modified_date = datetime.now()

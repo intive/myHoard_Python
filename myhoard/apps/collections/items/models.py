@@ -1,6 +1,5 @@
 from mongoengine import Document, StringField, ListField, IntField, \
     ObjectIdField, DateTimeField, GeoPointField
-from datetime import datetime
 
 
 class Item(Document):
@@ -8,8 +7,8 @@ class Item(Document):
     description = StringField(max_length=250)
     location = GeoPointField()
     quantity = IntField(min_value=0)
-    created_date = DateTimeField(default=datetime.now())
-    modified_date = DateTimeField(default=datetime.now())
+    created_date = DateTimeField()
+    modified_date = DateTimeField()
     media = ListField(ObjectIdField())
     collection = ObjectIdField()
     owner = ObjectIdField()
