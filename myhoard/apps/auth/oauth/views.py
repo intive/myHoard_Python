@@ -59,7 +59,7 @@ def refresh_token(**kwargs):
 @json_response
 @custom_errors
 def oauth():
-    args = request.form.to_dict()
+    args = request.get_json()
 
     if 'grant_type' not in args:
         raise AuthError(
