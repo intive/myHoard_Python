@@ -1,11 +1,14 @@
-from flask import current_app, request, jsonify
-from mongoengine import ValidationError, NotUniqueError, DoesNotExist
+from functools import wraps
 
-from myhoard.apps.common.errors import AuthError
-from myhoard.apps.auth.oauth.utils import check_token
+from flask import current_app, jsonify
+from mongoengine import ValidationError, NotUniqueError, DoesNotExist
+from bson.errors import InvalidId
+
+from myhoard.apps.common.errors import FileError, JSONError, AuthError
 
 
 def json_response(f):
+    @wraps(f)
     def wrapper(*args, **kwargs):
         data, code = f(*args, **kwargs)
         return jsonify(data), code
@@ -14,54 +17,56 @@ def json_response(f):
 
 
 def custom_errors(f):
-    def make_formatted_response(error_code, **kwargs):
+    def make_formatted_response(error_code, errors=None, http_code=400):
         resp = {
-            'error_code': error_code,
+            'error_code': current_app.config[error_code],
+            'error_message': error_code,
         }
 
-        if kwargs.get('errors'):
-            resp['errors'] = kwargs.get('errors')
+        if errors:
+            resp['errors'] = errors
 
-        return resp, kwargs.get('http_code') or 400
+        return resp, http_code
 
+    @wraps(f)
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
+        except FileError as e:
+            return make_formatted_response(
+                e.error_code,
+                errors=e.errors,
+            )
+        except JSONError:
+            return make_formatted_response(
+                'ERROR_CODE_NO_INCOMING_JSON_DATA',
+            )
         except ValidationError as e:
             return make_formatted_response(
-                current_app.config['ERROR_CODE_VALIDATION'],
+                'ERROR_CODE_VALIDATION',
                 errors=e.to_dict(),
             )
         except NotUniqueError:
             return make_formatted_response(
-                current_app.config['ERROR_CODE_DUPLICATE'],
+                'ERROR_CODE_DUPLICATE',
             )
         except DoesNotExist:
             return make_formatted_response(
-                current_app.config['ERROR_CODE_NOT_EXIST'],
+                'ERROR_CODE_NOT_EXIST',
                 http_code=404,
             )
         except AuthError as e:
             return make_formatted_response(
                 e.error_code,
                 errors=e.errors,
-                http_code=e.http_code
+                http_code=e.http_code,
             )
-
-    return wrapper
-
-
-def login_required(f):
-    def wrapper(*args, **kwargs):
-        # OAuth
-        if request.headers.get('Authorization'):
-            check_token(request.headers.get('Authorization'))
-        else:
-            raise AuthError(
-                current_app.config['ERROR_CODE_AUTH_NOT_PROVIDED'],
-                http_code=401
+        # raised when trying to get Object with an invalid id.
+        except InvalidId as e:
+            return make_formatted_response(
+                'ERROR_CODE_NOT_EXIST',
+                errors={'ObjectId': str(e)},
+                http_code=404,
             )
-
-        return f(*args, **kwargs)
 
     return wrapper

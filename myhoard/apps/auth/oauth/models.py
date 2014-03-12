@@ -9,7 +9,6 @@ class Token(Document):
     access_token = UUIDField(unique=True)
     refresh_token = UUIDField(unique=True)
     user = ObjectIdField()
-    scope = StringField(choices=('read', 'write', 'read+write'))
     created = DateTimeField(default=datetime.now)
 
     meta = {

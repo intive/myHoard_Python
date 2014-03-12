@@ -1,19 +1,20 @@
+from datetime import datetime
+
 from flask import g
 from flask.ext.restful import Resource, marshal_with, fields
 
-from models import Collection
-from myhoard.apps.common.decorators import custom_errors, login_required
+from myhoard.apps.common.decorators import custom_errors
 from myhoard.apps.common.utils import get_request_json
+from myhoard.apps.auth.decorators import login_required
 
-from datetime import datetime
+from models import Collection
 
-# collection marshal fields
 collection_fields = {
     'id': fields.String,
     'name': fields.String,
     'description': fields.String,
     'tags': fields.List(fields.String),
-    'items_number': fields.Integer,
+    'items_count': fields.Integer,
     'created_date': fields.String,
     'modified_date': fields.String,
     'owner': fields.String
@@ -21,8 +22,7 @@ collection_fields = {
 
 
 class Collections(Resource):
-    method_decorators = [marshal_with(collection_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
 
     def get(self, id):
         collection = Collection.objects.get(id=id)
@@ -48,11 +48,11 @@ class Collections(Resource):
 
 
 class CollectionsList(Resource):
-    method_decorators = [marshal_with(collection_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
 
     def post(self):
         collection = Collection(**get_request_json())
+        collection.items_count = 0
         collection.owner = g.user
         collection.created_date = datetime.now()
         collection.modified_date = datetime.now()
