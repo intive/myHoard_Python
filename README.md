@@ -27,7 +27,7 @@ Requires the Pillow library
 ``python manage.py runserver``
 
 
-# API
+# API - curl examples
 ## create a new user
 curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d '{"username": "krol.julian", "email": "krol.julian@mail.com", "password": "mort1234"}' http://localhost:5000/users/
 
