@@ -23,7 +23,7 @@ class MediaField(fields.Raw):
     def format(self, media_id):
         return {
             'id': str(media_id),
-            'url': url_for('media', id=media_id, _external=True)
+            'url': url_for('mediadetails', id=media_id, _external=True)
         }
 
 # item marshal fields
@@ -41,7 +41,7 @@ item_fields = {
 }
 
 
-class Items(Resource):
+class ItemDetails(Resource):
     method_decorators = [marshal_with(item_fields), login_required,
                          custom_errors]
 
@@ -98,7 +98,7 @@ class Items(Resource):
         return '', 204
 
 
-class ItemsList(Resource):
+class ItemList(Resource):
     method_decorators = [marshal_with(item_fields), login_required,
                          custom_errors]
 

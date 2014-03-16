@@ -23,7 +23,7 @@ collection_fields = {
 }
 
 
-class Collections(Resource):
+class CollectionDetails(Resource):
     method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
 
     def get(self, id):
@@ -49,7 +49,7 @@ class Collections(Resource):
         return '', 204
 
 
-class CollectionsList(Resource):
+class CollectionList(Resource):
     method_decorators = [login_required, custom_errors]
 
     def post(self):

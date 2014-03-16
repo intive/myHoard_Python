@@ -15,7 +15,7 @@ media_fields = {
 }
 
 
-class Media(Resource):
+class MediaDetails(Resource):
     method_decorators = [custom_errors]
 
     def get(self, id):

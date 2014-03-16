@@ -3,9 +3,9 @@ from flask import current_app
 from myhoard import api
 from myhoard.apps.auth.oauth.views import oauth
 from myhoard.apps.auth.views import Users
-from myhoard.apps.collections.views import Collections, CollectionsList, CollectionItemList
-from myhoard.apps.collections.items.views import Items, ItemsList
-from myhoard.apps.media.views import Media, MediaList
+from myhoard.apps.collections.views import CollectionDetails, CollectionList, CollectionItemList
+from myhoard.apps.collections.items.views import ItemDetails, ItemList
+from myhoard.apps.media.views import MediaDetails, MediaList
 
 # register the urls
 current_app.add_url_rule('/', view_func=api.landingpage, methods=['GET'])
@@ -14,13 +14,13 @@ current_app.add_url_rule('/oauth/token/', view_func=oauth, methods=['POST'])
 # restful api
 current_app.api.add_resource(Users, '/users/')
 
-current_app.api.add_resource(Collections, '/collections/<string:id>/')
-current_app.api.add_resource(CollectionsList, '/collections/')
+current_app.api.add_resource(CollectionDetails, '/collections/<string:id>/')
+current_app.api.add_resource(CollectionList, '/collections/')
 current_app.api.add_resource(CollectionItemList, '/collections/<string:id>/items/')
 
-current_app.api.add_resource(Items, '/items/<string:id>/')
-current_app.api.add_resource(ItemsList, '/items/')
+current_app.api.add_resource(ItemDetails, '/items/<string:id>/')
+current_app.api.add_resource(ItemList, '/items/')
 
-current_app.api.add_resource(Media, '/media/<string:id>/',
+current_app.api.add_resource(MediaDetails, '/media/<string:id>/',
                              '/media/<string:id>/thumbnail')
 current_app.api.add_resource(MediaList, '/media/')
