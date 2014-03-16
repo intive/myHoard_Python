@@ -26,3 +26,38 @@ ERROR_CODE_MEDIA_BAD_EXT = 106
 ERROR_CODE_MEDIA_ALREADY_HAVE_PARENT = 107
 
 ERROR_CODE_NOT_EXIST = 404
+
+# logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'root': {
+        'level': 'NOTSET',
+        'handlers': ['console', 'file'],
+    },
+
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'INFO',
+            'formatter': 'standard',
+            'stream': 'ext://sys.stdout',
+        },
+        'file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'INFO',
+            'formatter': 'standard',
+            'filename': 'myHoard.log',
+            'mode': 'a',
+            'maxBytes': 2097152, #2MB
+            'backupCount': 64,
+        },
+    },
+
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+        },
+    },
+}

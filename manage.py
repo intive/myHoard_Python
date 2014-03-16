@@ -1,4 +1,6 @@
 import os
+import logging
+import logging.config
 
 from flask import Flask
 from flask.ext.script import Manager
@@ -24,6 +26,12 @@ def create_app():
     # import urls
     with app.app_context():
         import myhoard.urls
+
+    # logging
+    logging.config.dictConfig(app.config['LOGGING'])
+
+    logger = logging.getLogger(__name__)
+    logger.info("app created")
 
     return app
 

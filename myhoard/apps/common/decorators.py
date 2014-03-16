@@ -1,4 +1,5 @@
 from functools import wraps
+import logging
 
 from flask import current_app, jsonify
 from mongoengine import ValidationError, NotUniqueError, DoesNotExist
@@ -6,6 +7,7 @@ from bson.errors import InvalidId
 
 from myhoard.apps.common.errors import FileError, JSONError, AuthError
 
+logger = logging.getLogger(__name__)
 
 def json_response(f):
     @wraps(f)
@@ -26,6 +28,8 @@ def custom_errors(f):
         if errors:
             resp['errors'] = errors
 
+        logger.error(resp)
+
         return resp, http_code
 
     @wraps(f)
@@ -33,29 +37,35 @@ def custom_errors(f):
         try:
             return f(*args, **kwargs)
         except FileError as e:
+            logger.exception(e)
             return make_formatted_response(
                 e.error_code,
                 errors=e.errors,
             )
-        except JSONError:
+        except JSONError as e:
+            logger.exception(e)
             return make_formatted_response(
                 'ERROR_CODE_NO_INCOMING_JSON_DATA',
             )
         except ValidationError as e:
+            logger.exception(e)
             return make_formatted_response(
                 'ERROR_CODE_VALIDATION',
                 errors=e.to_dict(),
             )
-        except NotUniqueError:
+        except NotUniqueError as e:
+            logger.exception(e)
             return make_formatted_response(
                 'ERROR_CODE_DUPLICATE',
             )
-        except DoesNotExist:
+        except DoesNotExist as e:
+            logger.exception(e)
             return make_formatted_response(
                 'ERROR_CODE_NOT_EXIST',
                 http_code=404,
             )
         except AuthError as e:
+            logger.exception(e)
             return make_formatted_response(
                 e.error_code,
                 errors=e.errors,
@@ -63,6 +73,7 @@ def custom_errors(f):
             )
         # raised when trying to get Object with an invalid id.
         except InvalidId as e:
+            logger.exception(e)
             return make_formatted_response(
                 'ERROR_CODE_NOT_EXIST',
                 errors={'ObjectId': str(e)},
