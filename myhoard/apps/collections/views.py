@@ -6,6 +6,8 @@ from flask.ext.restful import Resource, marshal_with, fields, marshal
 from myhoard.apps.common.decorators import custom_errors
 from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
+from myhoard.apps.collections.items.views import item_fields
+from myhoard.apps.collections.items.models import Item
 
 from models import Collection
 
@@ -78,3 +80,11 @@ class CollectionsList(Resource):
 
         return {"total_count": len(sorted_collections),
                 "collections": marshal(list(sorted_collections), collection_fields)}
+
+
+class CollectionItemList(Resource):
+    method_decorators = [marshal_with(item_fields), login_required, custom_errors]
+
+    def get(self, id):
+        return list(Item.objects(owner=g.user, collection=id))
+

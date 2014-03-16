@@ -3,7 +3,7 @@ from flask import current_app
 from myhoard import api
 from myhoard.apps.auth.oauth.views import oauth
 from myhoard.apps.auth.views import Users
-from myhoard.apps.collections.views import Collections, CollectionsList
+from myhoard.apps.collections.views import Collections, CollectionsList, CollectionItemList
 from myhoard.apps.collections.items.views import Items, ItemsList
 from myhoard.apps.media.views import Media, MediaList
 
@@ -16,6 +16,7 @@ current_app.api.add_resource(Users, '/users/')
 
 current_app.api.add_resource(Collections, '/collections/<string:id>/')
 current_app.api.add_resource(CollectionsList, '/collections/')
+current_app.api.add_resource(CollectionItemList, '/collections/<string:id>/items/')
 
 current_app.api.add_resource(Items, '/items/<string:id>/')
 current_app.api.add_resource(ItemsList, '/items/')
