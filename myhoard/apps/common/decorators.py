@@ -4,7 +4,7 @@ from flask import current_app, jsonify
 from mongoengine import ValidationError, NotUniqueError, DoesNotExist
 from bson.errors import InvalidId
 
-from myhoard.apps.common.errors import JSONError, AuthError
+from myhoard.apps.common.errors import FileError, JSONError, AuthError
 
 
 def json_response(f):
@@ -32,6 +32,11 @@ def custom_errors(f):
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
+        except FileError as e:
+            return make_formatted_response(
+                e.error_code,
+                errors=e.errors,
+            )
         except JSONError:
             return make_formatted_response(
                 'ERROR_CODE_NO_INCOMING_JSON_DATA',
