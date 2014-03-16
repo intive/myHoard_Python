@@ -58,7 +58,7 @@ class CollectionsList(Resource):
         collection.modified_date = datetime.now()
         collection.save()
 
-        return collection, 201
+        return marshal(collection, collection_fields), 201
 
     def get(self):
         sort_by = request.values.getlist('sort_by')
