@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import g, request
-from flask.ext.restful import Resource, marshal_with, fields
+from flask.ext.restful import Resource, marshal_with, fields, marshal
 
 from myhoard.apps.common.decorators import custom_errors
 from myhoard.apps.common.utils import get_request_json
@@ -48,7 +48,7 @@ class Collections(Resource):
 
 
 class CollectionsList(Resource):
-    method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
+    method_decorators = [login_required, custom_errors]
 
     def post(self):
         collection = Collection(**get_request_json())
@@ -61,10 +61,8 @@ class CollectionsList(Resource):
         return collection, 201
 
     def get(self):
-        # TODO sort
         sort_by = request.values.getlist('sort_by')
         sort_direction = request.values.get('sort_direction')
-        #geo = request.values.get('geo')
 
         # order direction + == asc, - == desc
         try:
@@ -76,6 +74,7 @@ class CollectionsList(Resource):
         order_by = [dir + s for s in sort_by]
 
         # sorting
-        sorted_collections = Collection.objects.order_by(*order_by)
+        sorted_collections = Collection.objects(owner=g.user).order_by(*order_by)
 
-        return list(sorted_collections)
+        return {"total_count": len(sorted_collections),
+                "collections": marshal(list(sorted_collections), collection_fields)}
