@@ -14,6 +14,7 @@ def login_required(f):
     def wrapper(*args, **kwargs):
         found = False
 
+        # TODO Use polymorphism instead
         for auth_method in _auth_methods:
             if auth_method.check(request):
                 auth_method.handle(request)

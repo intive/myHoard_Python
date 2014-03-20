@@ -19,6 +19,7 @@ class MediaDetails(Resource):
     method_decorators = [custom_errors]
 
     def get(self, id):
+        # TODO use get_or_404
         medium = Medium.objects.get(id=id)
 
         if request.url.endswith('thumbnail'):
@@ -49,6 +50,7 @@ class MediaDetails(Resource):
         return medium
 
     def delete(self, id):
+        # TODO use get_or_404
         medium = Medium.objects.get(id=id)
         medium.image.delete()
         medium.delete()

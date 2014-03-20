@@ -12,6 +12,7 @@ user_fields = {
 }
 
 
+# TODO Follow resource name convention
 class Users(Resource):
     method_decorators = [marshal_with(user_fields), custom_errors]
 

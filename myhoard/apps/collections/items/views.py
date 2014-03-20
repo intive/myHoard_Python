@@ -104,6 +104,7 @@ class ItemList(Resource):
 
     def post(self):
         item = Item(**get_request_json())
+        # TODO Move to model
         item.owner = g.user
         item.created_date = datetime.now()
         item.modified_date = datetime.now()
@@ -113,6 +114,7 @@ class ItemList(Resource):
         collection.items_count += 1
         collection.save()
 
+        # TODO Move to model
         for medium_id in item.media:
             medium = Medium.objects.get(id=medium_id)
             if not medium.collection:

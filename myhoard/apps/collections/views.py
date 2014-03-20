@@ -86,5 +86,7 @@ class CollectionItemList(Resource):
     method_decorators = [marshal_with(item_fields), login_required, custom_errors]
 
     def get(self, id):
+        # TODO check if collection exists first
+        # TODO use all() method instead
         return list(Item.objects(owner=g.user, collection=id))
 

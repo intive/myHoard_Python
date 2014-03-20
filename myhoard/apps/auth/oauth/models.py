@@ -6,6 +6,7 @@ from mongoengine import Document, UUIDField, StringField, ObjectIdField, \
 
 
 class Token(Document):
+    # TODO Rememeber - Fat models, thin views
     access_token = UUIDField(unique=True)
     refresh_token = UUIDField(unique=True)
     user = ObjectIdField()

@@ -36,6 +36,7 @@ def custom_errors(f):
     def wrapper(*args, **kwargs):
         try:
             return f(*args, **kwargs)
+        #TODO Lines should be max 80 or 140 chars long
         except FileError as e:
             logger.exception(e)
             return make_formatted_response(

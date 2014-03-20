@@ -8,6 +8,7 @@ from models import Token
 
 logger = logging.getLogger(__name__)
 
+# TODO redundant
 def check(req):
     return bool(req.headers.get('Authorization'))
 

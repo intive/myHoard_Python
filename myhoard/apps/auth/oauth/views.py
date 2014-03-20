@@ -12,6 +12,8 @@ from myhoard.apps.common.errors import AuthError
 from models import Token
 
 
+# TODO Move to domain object
+# TODO Do not pass kwargs between layers of not necessary
 def create_token(**kwargs):
     try:
         user = User.objects.get(username=kwargs.get('username', ''))
@@ -35,6 +37,7 @@ def create_token(**kwargs):
            }, 200
 
 
+# TODO Move to domain object
 @login_required
 def refresh_token(**kwargs):
     try:
