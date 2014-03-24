@@ -47,23 +47,7 @@ class CollectionList(Resource):
 
     @staticmethod
     def get():
-        sort_by = request.values.getlist('sort_by')
-        sort_direction = request.values.get('sort_direction')
-
-        # order direction + == asc, - == desc
-        try:
-            dir_ = {'asc': '+', 'desc': '-'}[sort_direction]
-        except KeyError:
-            dir_ = '+'
-
-        # setting direction sorting elements
-        order_by = [dir_ + s for s in sort_by]
-
-        # sorting
-        sorted_collections = Collection.objects(owner=g.user).order_by(
-            *order_by)
-
-        return list(sorted_collections)
+        return list(Collection.get_ordered(request.values))
 
 
 class CollectionItemList(Resource):
@@ -72,4 +56,4 @@ class CollectionItemList(Resource):
     @staticmethod
     def get(collection_id):
         Collection.objects.get_or_404(id=collection_id)
-        return list(Item.objects(owner=g.user, collection=collection_id))
+        return list(Item.get_ordered(request.values, collection_id))

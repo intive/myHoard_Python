@@ -6,6 +6,7 @@ from mongoengine import StringField, ListField, ObjectIdField, \
     DateTimeField
 
 from items.models import Item
+from myhoard.apps.common.utils import make_order_by_for_query
 
 
 class Collection(Document):
@@ -54,3 +55,8 @@ class Collection(Document):
         Item.delete_collection_items(collection)
 
         return collection.delete()
+
+    @classmethod
+    def get_ordered(cls, params):
+
+        return cls.objects(owner=g.user).order_by(*make_order_by_for_query(params))

@@ -6,6 +6,7 @@ from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, \
     GeoPointField
 
 from myhoard.apps.media.models import Media
+from myhoard.apps.common.utils import make_order_by_for_query
 
 
 class Item(Document):
@@ -64,3 +65,8 @@ class Item(Document):
             Media.delete_item_media(item)
 
             item.delete()
+
+    @classmethod
+    def get_ordered(cls, params, collection_id):
+
+        return cls.objects(owner=g.user, collection=collection_id).order_by(*make_order_by_for_query(params))
