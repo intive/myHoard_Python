@@ -4,30 +4,14 @@ TESTING = False
 
 # Auth
 AUTH_KEEP_ALIVE_TIME = 300
+AUTH_CLASSES = ('myhoard.apps.auth.oauth.models.Token',)
 
 # Image
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024 # 10MiB
 IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
-IMAGE_THUMBNAIL = (32, 32, True)  # w, h, fill_mode: true | scale_mode: false
+IMAGE_THUMBNAIL_SIZES = (160, 300, 340, 500)
 
-# Custom error codes
-ERROR_CODE_NO_INCOMING_FILE_DATA = 98
-ERROR_CODE_NO_INCOMING_JSON_DATA = 99
-
-ERROR_CODE_VALIDATION = 100
-ERROR_CODE_DUPLICATE = 101
-
-ERROR_CODE_AUTH = 102
-ERROR_CODE_AUTH_NOT_PROVIDED = 103
-ERROR_CODE_AUTH_BAD_PROVIDED = 104
-ERROR_CODE_AUTH_FAILED = 105
-
-ERROR_CODE_MEDIA_BAD_EXT = 106
-ERROR_CODE_MEDIA_ALREADY_HAVE_PARENT = 107
-
-ERROR_CODE_NOT_EXIST = 404
-
-# logging
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -50,7 +34,7 @@ LOGGING = {
             'formatter': 'standard',
             'filename': 'myHoard.log',
             'mode': 'a',
-            'maxBytes': 2097152, #2MB
+            'maxBytes': 2 * 1024 * 1024, # 2MiB
             'backupCount': 64,
         },
     },

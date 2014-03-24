@@ -11,27 +11,39 @@ from flask.ext.restful import Api
 def create_app():
     app = Flask(__name__)
 
-    # settings
-    settings_module = os.environ.get('MYHOARD_SETTINGS_MODULE')
-    if not settings_module:
-        raise EnvironmentError("Could not import settings, MYHOARD_SETTINGS_MODULE is None")
-    app.config.from_object(settings_module)
+    # Settings
+    settings_module_name = os.environ.get('MYHOARD_SETTINGS_MODULE')
+    if not settings_module_name:
+        raise EnvironmentError(
+            "Could not import settings, MYHOARD_SETTINGS_MODULE is None")
+    app.config.from_object(settings_module_name)
 
-    # mongoengine
-    app.db = MongoEngine(app)
+    # Converters
+    from myhoard.apps.common.converters import ObjectIDConverter
 
-    # restful
-    app.api = Api(app)
+    app.url_map.converters['objectid'] = ObjectIDConverter
 
-    # import urls
-    with app.app_context():
-        import myhoard.urls
-
-    # logging
+    # Logging
     logging.config.dictConfig(app.config['LOGGING'])
 
     logger = logging.getLogger(__name__)
     logger.info("app created")
+
+    # Mongoengine
+    app.db = MongoEngine(app)
+
+    # Restful
+    app.api = Api(app)
+
+    # Errors
+    from myhoard.apps.common.errors import handle_custom_errors
+
+    app.errorhandler(401)(handle_custom_errors) # For early errors
+    app.api.handle_error = handle_custom_errors # For late errors
+
+    # Import urls
+    with app.app_context():
+        import myhoard.urls
 
     return app
 

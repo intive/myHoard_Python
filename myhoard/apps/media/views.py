@@ -1,14 +1,9 @@
-from datetime import datetime
-
-from flask import Response
+from flask import abort, Response
 from flask.ext.restful import Resource, marshal_with, fields, request
 
-from myhoard.apps.common.errors import FileError
-from myhoard.apps.common.decorators import custom_errors
 from myhoard.apps.auth.decorators import login_required
 
-from models import Medium
-from utils import check_image_file
+from models import Media
 
 media_fields = {
     'id': fields.String,
@@ -16,42 +11,32 @@ media_fields = {
 
 
 class MediaDetails(Resource):
-    method_decorators = [custom_errors]
+    method_decorators = [login_required]
 
-    def get(self, id):
-        # TODO use get_or_404
-        medium = Medium.objects.get(id=id)
+    @staticmethod
+    def get(media_id):
+        media = Media.objects.get_or_404(id=media_id)
 
-        if request.url.endswith('thumbnail'):
-            image = medium.image.thumbnail
+        if 'size' in request.args:
+            size = request.args['size']
+            if size in media.images and (size != 'master'):
+                image = media.images[request.args['size']].get()
+            else:
+                abort(404)
         else:
-            image = medium.image.get()
+            image = media.images['master'].get()
 
         return Response(image, mimetype='image/' + image.format,
                         direct_passthrough=True)
 
+    @staticmethod
     @marshal_with(media_fields)
-    def put(self, id):
-        medium = Medium.objects.get(id=id)
+    def put(media_id):
+        return Media.update_media(media_id, request.files.get('image'))
 
-        if 'image' not in request.files:
-            raise FileError(
-                'ERROR_CODE_NO_INCOMING_FILE_DATA',
-                errors={'image': 'Field is required'}
-            )
-
-        image = request.files['image']
-        check_image_file(image)
-
-        medium.image.delete()
-        medium.image = image
-        medium.save()
-
-        return medium
-
-    def delete(self, id):
-        # TODO use get_or_404
-        medium = Medium.objects.get(id=id)
+    @staticmethod
+    def delete(media_id):
+        medium = Media.objects.get_or_404(id=media_id)
         medium.image.delete()
         medium.delete()
 
@@ -59,21 +44,8 @@ class MediaDetails(Resource):
 
 
 class MediaList(Resource):
-    method_decorators = [marshal_with(media_fields), login_required,
-                         custom_errors]
+    method_decorators = [marshal_with(media_fields), login_required]
 
-    def post(self):
-        if 'image' not in request.files:
-            raise FileError(
-                'ERROR_CODE_NO_INCOMING_FILE_DATA',
-                errors={'image': 'Field is required'}
-            )
-
-        image = request.files['image']
-        check_image_file(image)
-
-        medium = Medium(image=image)
-        medium.created_date = datetime.now()
-        medium.save()
-
-        return medium, 201
+    @staticmethod
+    def post():
+        return Media.create_media(request.files.get('image')), 201

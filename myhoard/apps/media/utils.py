@@ -1,7 +1,5 @@
 from flask import current_app
 
-from myhoard.apps.common.errors import FileError
-
 
 def check_image_file(file):
     # TODO Move validation to validate method in Menium class (raise ValidationError instead of FileError);

@@ -1,9 +1,6 @@
-from datetime import datetime
-
 from flask import g, request
-from flask.ext.restful import Resource, marshal_with, fields, marshal
+from flask.ext.restful import Resource, marshal_with, fields
 
-from myhoard.apps.common.decorators import custom_errors
 from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
 from myhoard.apps.collections.items.views import item_fields
@@ -24,69 +21,55 @@ collection_fields = {
 
 
 class CollectionDetails(Resource):
-    method_decorators = [marshal_with(collection_fields), login_required, custom_errors]
+    method_decorators = [marshal_with(collection_fields), login_required]
 
-    def get(self, id):
-        collection = Collection.objects.get(id=id)
+    @staticmethod
+    def get(collection_id):
+        return Collection.objects.get_or_404(id=collection_id)
 
-        return collection
+    @staticmethod
+    def put(collection_id):
+        return Collection.update_collection(collection_id, **get_request_json())
 
-    def put(self, id):
-        collection = Collection.objects.get(id=id)
-        update_collection = Collection(**get_request_json())
-        collection.name = update_collection.name
-        collection.description = update_collection.description
-        collection.tags = update_collection.tags
-        collection.modified_date = datetime.now()
-        collection.save()
-
-        return collection
-
-    def delete(self, id):
-        collection = Collection.objects.get(id=id)
-        collection.delete()
+    @staticmethod
+    def delete(collection_id):
+        Collection.delete_collection(collection_id)
 
         return '', 204
 
 
 class CollectionList(Resource):
-    method_decorators = [login_required, custom_errors]
+    method_decorators = [marshal_with(collection_fields), login_required]
 
-    def post(self):
-        collection = Collection(**get_request_json())
-        collection.items_count = 0
-        collection.owner = g.user
-        collection.created_date = datetime.now()
-        collection.modified_date = datetime.now()
-        collection.save()
+    @staticmethod
+    def post():
+        return Collection.create_collection(**get_request_json())
 
-        return marshal(collection, collection_fields), 201
-
-    def get(self):
+    @staticmethod
+    def get():
         sort_by = request.values.getlist('sort_by')
         sort_direction = request.values.get('sort_direction')
 
         # order direction + == asc, - == desc
         try:
-            dir = {'asc': '+', 'desc': '-'}[sort_direction]
+            dir_ = {'asc': '+', 'desc': '-'}[sort_direction]
         except KeyError:
-            dir = '+'
+            dir_ = '+'
 
         # setting direction sorting elements
-        order_by = [dir + s for s in sort_by]
+        order_by = [dir_ + s for s in sort_by]
 
         # sorting
-        sorted_collections = Collection.objects(owner=g.user).order_by(*order_by)
+        sorted_collections = Collection.objects(owner=g.user).order_by(
+            *order_by)
 
-        return {"total_count": len(sorted_collections),
-                "collections": marshal(list(sorted_collections), collection_fields)}
+        return list(sorted_collections)
 
 
 class CollectionItemList(Resource):
-    method_decorators = [marshal_with(item_fields), login_required, custom_errors]
+    method_decorators = [marshal_with(item_fields), login_required]
 
-    def get(self, id):
-        # TODO check if collection exists first
-        # TODO use all() method instead
-        return list(Item.objects(owner=g.user, collection=id))
-
+    @staticmethod
+    def get(collection_id):
+        Collection.objects.get_or_404(id=collection_id)
+        return list(Item.objects(owner=g.user, collection=collection_id))
