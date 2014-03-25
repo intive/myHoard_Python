@@ -52,4 +52,7 @@ def handle_custom_errors(e):
 
         return resp, http_code
     else:
-        reraise(*sys.exc_info())
+        return {
+            'error_code': 301,
+            'error_message': e.message,
+        }, 500
