@@ -1,4 +1,4 @@
-from flask import g, request
+from flask import request
 from flask.ext.restful import Resource, marshal_with, fields
 
 from myhoard.apps.common.utils import get_request_json

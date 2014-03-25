@@ -26,9 +26,9 @@ class Item(Document):
     def create_item(cls, **kwargs):
         item = cls(**kwargs)
         item.id = None
-        item.owner = g.user
         item.created_date = None
         item.modified_date = None
+        item.owner = g.user
 
         if 'location' in item:
             item.location = (item.location.get('lat'), item.location.get('lng'))
@@ -41,7 +41,7 @@ class Item(Document):
 
     @classmethod
     def update_item(cls, item_id, **kwargs):
-        item = cls.objects.get_or_404(id=item_id)
+        item = cls.objects.get_or_404(id=item_id, owner=g.user)
         update_item = cls(**kwargs)
         update_item.id = item.id
         update_item.created_date = item.created_date
@@ -53,7 +53,7 @@ class Item(Document):
 
     @classmethod
     def delete_item(cls, item_id):
-        item = cls.objects.get_or_404(id=item_id)
+        item = cls.objects.get_or_404(id=item_id, owner=g.user)
 
         Media.delete_item_media(item)
 
@@ -68,5 +68,5 @@ class Item(Document):
 
     @classmethod
     def get_ordered(cls, params, collection_id):
-
-        return cls.objects(owner=g.user, collection=collection_id).order_by(*make_order_by_for_query(params))
+        return cls.objects(owner=g.user, collection=collection_id).order_by(
+            *make_order_by_for_query(params))

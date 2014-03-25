@@ -6,6 +6,7 @@ from werkzeug.exceptions import NotFound
 
 from errors import handle_custom_errors
 
+
 class ObjectIDConverter(BaseConverter):
     def to_python(self, value):
         try:

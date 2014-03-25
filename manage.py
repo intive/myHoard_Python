@@ -38,9 +38,10 @@ def create_app():
     # Errors
     from myhoard.apps.common.errors import handle_custom_errors
 
-    app.errorhandler(401)(handle_custom_errors) # For early errors
-    app.errorhandler(500)(handle_custom_errors)
-    app.api.handle_error = handle_custom_errors # For late errors
+    app.register_error_handler(401, handle_custom_errors)  # Early errors
+    app.register_error_handler(403, handle_custom_errors)  # Early errors
+    app.register_error_handler(Exception, handle_custom_errors)  # Early errors
+    app.api.handle_error = handle_custom_errors  # Late errors
 
     # Import urls
     with app.app_context():

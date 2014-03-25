@@ -1,7 +1,7 @@
 from datetime import datetime
 from PIL import Image, ImageOps
 
-from flask import current_app
+from flask import current_app, g
 from flask.ext.mongoengine import Document
 from mongoengine import MapField, ImageField, DateTimeField, \
     ObjectIdField, ValidationError
@@ -12,6 +12,7 @@ class Media(Document):
     images = MapField(ImageField())
     created_date = DateTimeField(default=datetime.now)
     item = ObjectIdField()
+    owner = ObjectIdField()
 
     def __repr__(self):
         return '<Media {}>'.format(self.id)
@@ -33,6 +34,9 @@ class Media(Document):
             raise ValidationError(errors={'image': 'Field is required'})
 
         media = cls()
+        media.id = None
+        media.created_date = None
+        media.owner = g.user
 
         try:
             image = Image.open(image_file)
@@ -50,7 +54,7 @@ class Media(Document):
 
     @classmethod
     def update_media(cls, media_id, image_file):
-        medium = cls.objects.get_or_404(id=media_id)
+        medium = cls.objects.get_or_404(id=media_id, owner=g.user)
 
         if not image_file:
             raise ValidationError(errors={'image': 'Field is required'})
@@ -67,7 +71,8 @@ class Media(Document):
 
     @classmethod
     def create_item_media(cls, item):
-        for media in Media.objects(id__in=item.media, item__not__exists=True):
+        for media in Media.objects(id__in=item.media, item__not__exists=True,
+                                   owner=g.user):
             media.item = item.id
             media.save()
 

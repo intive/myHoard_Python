@@ -1,6 +1,6 @@
 from flask import current_app
 
-from myhoard import api
+from myhoard.api import landingpage
 from myhoard.apps.auth.oauth.views import oauth
 from myhoard.apps.auth.views import UserDetails
 from myhoard.apps.collections.views import CollectionDetails, CollectionList, \
@@ -8,11 +8,11 @@ from myhoard.apps.collections.views import CollectionDetails, CollectionList, \
 from myhoard.apps.collections.items.views import ItemDetails, ItemList
 from myhoard.apps.media.views import MediaDetails, MediaList
 
-# register the urls
-current_app.add_url_rule('/', view_func=api.landingpage, methods=['GET'])
+# Top scope urls
+current_app.add_url_rule('/', view_func=landingpage, methods=['GET'])
 current_app.add_url_rule('/oauth/token/', view_func=oauth, methods=['POST'])
 
-# restful api
+# Blueprint urls
 current_app.api.add_resource(UserDetails, '/users/')
 
 current_app.api.add_resource(CollectionDetails,

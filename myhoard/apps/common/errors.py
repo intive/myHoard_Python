@@ -1,8 +1,11 @@
 import logging
 import re
+import sys
+from six import reraise
+
+from werkzeug.exceptions import Unauthorized, Forbidden, NotFound
 
 from mongoengine import ValidationError, NotUniqueError
-from werkzeug.exceptions import Unauthorized, Forbidden, NotFound
 
 from decorators import json_response
 
@@ -10,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 _custom_error_mapping = {
     #error_code, http_code, error_message
-    Unauthorized: (102, 401, 'Token not provided'),
+    Unauthorized: (102, 401, 'Auth method not provided'),
     Forbidden: (104, 403, 'Forbidden'),
     ValidationError: (201, 400, 'Validation error'),
     NotUniqueError: (201, 400, 'Validation error'),
@@ -18,6 +21,7 @@ _custom_error_mapping = {
 }
 
 _duplicate_re = re.compile(r'\$(.+?)_')
+
 
 @json_response
 def handle_custom_errors(e):
@@ -48,4 +52,4 @@ def handle_custom_errors(e):
 
         return resp, http_code
     else:
-        raise e
+        reraise(*sys.exc_info())

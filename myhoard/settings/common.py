@@ -4,7 +4,7 @@ TESTING = False
 
 # Auth
 AUTH_KEEP_ALIVE_TIME = 300
-AUTH_CLASSES = ('myhoard.apps.auth.oauth.models.Token',)
+AUTH_CLASSES = ('myhoard.apps.auth.oauth.authenticators.OAuthAuthenticator',)
 
 # Image
 MAX_CONTENT_LENGTH = 10 * 1024 * 1024 # 10MiB

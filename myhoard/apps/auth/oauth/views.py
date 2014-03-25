@@ -1,5 +1,5 @@
 from flask import current_app
-from flask.ext.restful import fields, marshal
+from flask.ext.restful import fields, marshal, marshal_with
 from mongoengine import ValidationError
 
 from myhoard.apps.auth.decorators import login_required
@@ -27,8 +27,7 @@ def oauth():
             Token.create_token(args.get('email'), args.get('password')),
             token_fields), 200
     elif args.get('grant_type') == 'refresh_token':
-        return login_required(marshal(
-            Token.refresh_token_(args.get('access_token'),
-                                 args.get('refresh_token')), token_fields)), 200
+        return login_required(marshal_with(token_fields)(Token.refresh_token_))(
+            args.get('access_token'), args.get('refresh_token')), 200
     else:
         raise ValidationError(errors={'grant_type': 'Unsupported grant_type'})

@@ -2,8 +2,9 @@ from uuid import uuid4
 from datetime import datetime
 
 from werkzeug.security import check_password_hash
-from werkzeug.exceptions import Unauthorized, Forbidden
-from flask import current_app, request, g
+from werkzeug.exceptions import Forbidden
+
+from flask import current_app
 from flask.ext.mongoengine import Document
 from mongoengine import UUIDField, ObjectIdField, DateTimeField, \
     DoesNotExist
@@ -53,16 +54,3 @@ class Token(Document):
         token.created = None
 
         return token.save()
-
-    @classmethod
-    def auth(cls):
-        if 'Authorization' in request.headers:
-            try:
-                token = Token.objects.get(
-                    access_token=request.headers.get('Authorization'))
-            except (ValueError, DoesNotExist):
-                raise Forbidden()
-
-            g.user = token.user
-        else:
-            raise Unauthorized()
