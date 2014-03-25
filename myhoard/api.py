@@ -14,3 +14,11 @@ def landingpage():
 
     return render_template('index.html', links=sorted(links),
                            revision=current_revision())
+
+def logs():
+    resp = ''
+
+    with open('myHoard.log') as file:
+        resp = file.read()
+
+    return resp, 200
