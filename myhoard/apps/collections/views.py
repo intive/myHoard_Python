@@ -5,6 +5,8 @@ from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
 from myhoard.apps.collections.items.views import item_fields
 from myhoard.apps.collections.items.models import Item
+from myhoard.apps.collections.comments.views import comment_fields
+from myhoard.apps.collections.comments.models import Comment
 
 from models import Collection
 
@@ -57,3 +59,12 @@ class CollectionItemList(Resource):
     def get(collection_id):
         Collection.objects.get_or_404(id=collection_id)
         return list(Item.get_ordered(request.values, collection_id))
+
+
+class CollectionCommentList(Resource):
+    method_decorators = [marshal_with(comment_fields), login_required]
+
+    @staticmethod
+    def get(collection_id):
+        Collection.objects.get_or_404(id=collection_id)
+        return list(Comment.objects(collection=collection_id))
