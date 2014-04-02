@@ -21,6 +21,8 @@ def create_app():
     # Converters
     from myhoard.apps.common.converters import ObjectIDConverter
 
+    # TODO use url mappping regular expression instead
+    # TODO or https://flask-pymongo.readthedocs.org/en/latest/
     app.url_map.converters['objectid'] = ObjectIDConverter
 
     # Logging

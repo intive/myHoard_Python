@@ -24,6 +24,7 @@ class Media(Document):
             image_obj.save(io, image_format)
             io.seek(0)
 
+            # TODO elaborate
             image_proxy = cls._fields['images'].field.get_proxy_obj('images',
                                                                     media)
             image_proxy.put(io)

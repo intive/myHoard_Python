@@ -10,6 +10,7 @@ user_fields = {
 }
 
 
+# TODO shouldn't it be UserList
 class UserDetails(Resource):
     method_decorators = [marshal_with(user_fields)]
 
