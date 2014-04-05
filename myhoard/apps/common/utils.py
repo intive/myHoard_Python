@@ -5,6 +5,7 @@ from mongoengine import ValidationError
 
 
 def get_request_json():
+    # TODO docs
     json = request.get_json(silent=True)
     if not json:
         raise ValidationError('No incoming JSON data')
@@ -13,12 +14,14 @@ def get_request_json():
 
 
 def load_class(path):
+    # TODO docs
     mod, cls = path.rsplit('.', 1)
     mod = import_module(mod)
     return getattr(mod, cls)
 
 
 def make_order_by_for_query(params):
+    # TODO docs
     directions = {'asc': '+', 'desc': '-'}
 
     sort_by = params.getlist('sort_by')

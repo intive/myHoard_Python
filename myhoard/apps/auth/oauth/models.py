@@ -41,6 +41,7 @@ class Token(Document):
 
         return token.save()
 
+    # TODO naming convention
     @classmethod
     def refresh_token_(cls, access_token='', refresh_token=''):
         try:

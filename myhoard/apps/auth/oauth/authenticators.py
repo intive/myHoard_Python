@@ -15,8 +15,13 @@ class OAuthAuthenticator(BaseAuthenticator):
                 token = Token.objects.get(
                     access_token=request.headers.get('Authorization'))
             except (ValueError, DoesNotExist):
+                # TODO Why value error?
+                # TODO missing logs
+                # TODO add error message
                 raise Forbidden()
 
             g.user = token.user
         else:
+            # TODO missing logs
+            # TODO add error message
             raise Unauthorized()
