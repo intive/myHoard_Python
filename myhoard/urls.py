@@ -4,7 +4,7 @@ from myhoard.api import landingpage, logs
 from myhoard.apps.auth.oauth.views import oauth
 from myhoard.apps.auth.views import UserDetails
 from myhoard.apps.collections.views import CollectionDetails, CollectionList, \
-    CollectionItemList, CollectionCommentList
+    CollectionItemList, CollectionCommentList, UserPublicCollectionList
 from myhoard.apps.collections.items.views import ItemDetails, ItemList
 from myhoard.apps.media.views import MediaDetails, MediaList
 from myhoard.apps.collections.comments.views import CommentDetails, CommentList
@@ -16,6 +16,7 @@ current_app.add_url_rule('/oauth/token/', view_func=oauth, methods=['POST'])
 
 # Blueprint urls
 current_app.api.add_resource(UserDetails, '/users/')
+current_app.api.add_resource(UserPublicCollectionList, '/users/<objectid:user_id>/collections/')
 
 current_app.api.add_resource(CollectionDetails, '/collections/<objectid:collection_id>/')
 current_app.api.add_resource(CollectionList, '/collections/')

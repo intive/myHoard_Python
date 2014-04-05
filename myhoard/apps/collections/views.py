@@ -7,6 +7,7 @@ from myhoard.apps.collections.items.views import item_fields
 from myhoard.apps.collections.items.models import Item
 from myhoard.apps.collections.comments.views import comment_fields
 from myhoard.apps.collections.comments.models import Comment
+from myhoard.apps.auth.models import User
 
 from models import Collection
 
@@ -19,6 +20,7 @@ collection_fields = {
     'created_date': fields.String,
     'modified_date': fields.String,
     'owner': fields.String,
+    'public': fields.Boolean,
 }
 
 
@@ -68,3 +70,12 @@ class CollectionCommentList(Resource):
     def get(collection_id):
         Collection.objects.get_or_404(id=collection_id)
         return list(Comment.objects(collection=collection_id))
+
+
+class UserPublicCollectionList(Resource):
+    method_decorators = [marshal_with(collection_fields), login_required]
+
+    @staticmethod
+    def get(user_id):
+        User.objects.get_or_404(id=user_id)
+        return list(Collection.objects(owner=user_id, public=True))

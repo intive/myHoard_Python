@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import g
 from flask.ext.mongoengine import Document
 from mongoengine import StringField, ListField, ObjectIdField, \
-    DateTimeField
+    DateTimeField, BooleanField
 
 from myhoard.apps.common.utils import make_order_by_for_query
 
@@ -18,6 +18,7 @@ class Collection(Document):
     created_date = DateTimeField(default=datetime.now)
     modified_date = DateTimeField(default=datetime.now)
     owner = ObjectIdField()
+    public = BooleanField(default=False)
 
     def __repr__(self):
         return '<Collection {}>'.format(self.name)
