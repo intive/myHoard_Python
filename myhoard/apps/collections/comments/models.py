@@ -11,9 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class Comment(Document):
-    body = StringField(min_length=1, max_length=160, required=True)
+    content = StringField(min_length=1, max_length=160, required=True)
     created_date = DateTimeField(default=datetime.now)
-    modified_date = DateTimeField(default=datetime.now)
     collection = ObjectIdField(required=True)
     owner = ObjectIdField()
 
@@ -24,9 +23,10 @@ class Comment(Document):
     def create(cls, **kwargs):
         comment = cls(**kwargs)
         comment.created_date = None
-        comment.modified_date = None
         comment.owner = g.user
         comment.save()
+
+        logger.debug("comment with id: %s created" % comment.id)
 
         return comment
 
@@ -35,7 +35,6 @@ class Comment(Document):
         comment = cls.objects.get_or_404(id=comment_id, owner=g.user)
         update_comment = cls(**kwargs)
         comment.body = update_comment.body
-        comment.modified_date = None
 
         return comment.save()
 

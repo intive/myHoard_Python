@@ -9,9 +9,8 @@ logger = logging.getLogger(__name__)
 
 comment_fields = {
     'id': fields.String,
-    'body': fields.String,
+    'content': fields.String,
     'created_date': fields.String,
-    'modified_date': fields.String,
     'collection': fields.String,
     'owner': fields.String
 }
