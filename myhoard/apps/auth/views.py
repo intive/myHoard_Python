@@ -10,9 +10,8 @@ user_fields = {
 }
 
 
-# TODO shouldn't it be UserList
-class UserDetails(Resource):
+class UserList(Resource):
     method_decorators = [marshal_with(user_fields)]
 
     def post(self):
-        return User.create_user(**get_request_json()), 201
+        return User.create(**get_request_json()), 201

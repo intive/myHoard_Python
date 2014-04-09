@@ -11,7 +11,7 @@ class ObjectIDConverter(BaseConverter):
     def to_python(self, value):
         try:
             return ObjectId(value)
-        except (InvalidId, TypeError):
+        except InvalidId:
             handle_custom_errors(NotFound())
 
     def to_url(self, value):

@@ -7,21 +7,15 @@ from myhoard.apps.auth.authenticators import BaseAuthenticator
 
 from models import Token
 
-
 class OAuthAuthenticator(BaseAuthenticator):
     def authenticate(self):
         if 'Authorization' in request.headers:
             try:
                 token = Token.objects.get(
                     access_token=request.headers.get('Authorization'))
-            except (ValueError, DoesNotExist):
-                # TODO Why value error?
-                # TODO missing logs
-                # TODO add error message
-                raise Forbidden()
+            except DoesNotExist:
+                raise Forbidden('Access token not found')
 
             g.user = token.user
         else:
-            # TODO missing logs
-            # TODO add error message
-            raise Unauthorized()
+            raise Unauthorized('Missing Authorization header')

@@ -23,7 +23,7 @@ class Item(Document):
         return '<Item {}>'.format(self.name)
 
     @classmethod
-    def create_item(cls, **kwargs):
+    def create(cls, **kwargs):
         item = cls(**kwargs)
         item.id = None
         item.created_date = None
@@ -35,34 +35,34 @@ class Item(Document):
 
         item.save()
 
-        Media.create_item_media(item)
+        Media.create_from_item(item)
 
         return item
 
     @classmethod
-    def update_item(cls, item_id, **kwargs):
+    def update(cls, item_id, **kwargs):
         item = cls.objects.get_or_404(id=item_id, owner=g.user)
         update_item = cls(**kwargs)
         update_item.id = item.id
         update_item.created_date = item.created_date
         update_item.modified_date = None
 
-        Media.update_item_media(item, update_item)
+        Media.update_from_item(item, update_item)
 
         return update_item.save()
 
     @classmethod
-    def delete_item(cls, item_id):
+    def delete(cls, item_id):
         item = cls.objects.get_or_404(id=item_id, owner=g.user)
 
-        Media.delete_item_media(item)
+        Media.delete_from_item(item)
 
         return item.delete()
 
     @classmethod
-    def delete_collection_items(cls, collection):
+    def delete_from_collection(cls, collection):
         for item in cls.objects(collection=collection.id):
-            Media.delete_item_media(item)
+            Media.delete_from_item(item)
 
             item.delete()
 

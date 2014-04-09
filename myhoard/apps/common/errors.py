@@ -1,7 +1,5 @@
 import logging
 import re
-import sys
-from six import reraise
 
 from werkzeug.exceptions import Unauthorized, Forbidden, NotFound
 

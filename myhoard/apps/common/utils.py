@@ -5,7 +5,7 @@ from mongoengine import ValidationError
 
 
 def get_request_json():
-    # TODO docs
+    '''returns parsed JSON data from flask request, throws ValidationError on fail'''
     json = request.get_json(silent=True)
     if not json:
         raise ValidationError('No incoming JSON data')
@@ -14,14 +14,14 @@ def get_request_json():
 
 
 def load_class(path):
-    # TODO docs
+    '''Dynamically loads and returns class from given path'''
     mod, cls = path.rsplit('.', 1)
     mod = import_module(mod)
     return getattr(mod, cls)
 
 
 def make_order_by_for_query(params):
-    # TODO docs
+    '''Returns mongolike sort_by prefixed with directions from given flask params'''
     directions = {'asc': '+', 'desc': '-'}
 
     sort_by = params.getlist('sort_by')

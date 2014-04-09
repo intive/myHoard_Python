@@ -15,7 +15,6 @@ def _load_auth_classes():
 
 
 _load_auth_classes()
-# TODO what's the point of deleting functions
 del _load_auth_classes
 
 

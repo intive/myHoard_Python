@@ -28,7 +28,7 @@ class Collection(Document):
         return Item.objects(collection=self.id).count() if self.id else 0
 
     @classmethod
-    def create_collection(cls, **kwargs):
+    def create(cls, **kwargs):
         collection = cls(**kwargs)
         collection.id = None
         collection.created_date = None
@@ -38,7 +38,7 @@ class Collection(Document):
         return collection.save()
 
     @classmethod
-    def update_collection(cls, collection_id, **kwargs):
+    def update(cls, collection_id, **kwargs):
         collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
         update_collection = cls(**kwargs)
         update_collection.id = collection.id
@@ -49,9 +49,9 @@ class Collection(Document):
         return update_collection.save()
 
     @classmethod
-    def delete_collection(cls, collection_id):
+    def delete(cls, collection_id):
         collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
-        Item.delete_collection_items(collection)
+        Item.delete_from_collection(collection)
 
         return collection.delete()
 

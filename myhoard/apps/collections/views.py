@@ -33,11 +33,11 @@ class CollectionDetails(Resource):
 
     @staticmethod
     def put(collection_id):
-        return Collection.update_collection(collection_id, **get_request_json())
+        return Collection.update(collection_id, **get_request_json())
 
     @staticmethod
     def delete(collection_id):
-        Collection.delete_collection(collection_id)
+        Collection.delete(collection_id)
 
         return '', 204
 
@@ -47,7 +47,7 @@ class CollectionList(Resource):
 
     @staticmethod
     def post():
-        return Collection.create_collection(**get_request_json())
+        return Collection.create(**get_request_json())
 
     @staticmethod
     def get():

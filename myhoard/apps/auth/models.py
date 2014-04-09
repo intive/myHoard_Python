@@ -14,7 +14,7 @@ class User(Document):
     }
 
     @classmethod
-    def create_user(cls, **kwargs):
+    def create(cls, **kwargs):
         user = cls(**kwargs)
         user.id = None
 

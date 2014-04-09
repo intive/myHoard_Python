@@ -28,7 +28,7 @@ class Token(Document):
     }
 
     @classmethod
-    def create_token(cls, email='', password=''):
+    def create(cls, email='', password=''):
         try:
             user = User.objects.get(email=email)
         except DoesNotExist:
@@ -41,9 +41,8 @@ class Token(Document):
 
         return token.save()
 
-    # TODO naming convention
     @classmethod
-    def refresh_token_(cls, access_token='', refresh_token=''):
+    def refresh(cls, access_token='', refresh_token=''):
         try:
             token = Token.objects.get(access_token=access_token,
                                       refresh_token=refresh_token)

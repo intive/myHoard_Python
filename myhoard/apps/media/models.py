@@ -18,13 +18,12 @@ class Media(Document):
         return '<Media {}>'.format(self.id)
 
     @classmethod
-    def create_media(cls, image_file):
+    def create(cls, image_file):
         def put_image(image_obj, index):
             io = StringIO()
             image_obj.save(io, image_format)
             io.seek(0)
 
-            # TODO elaborate
             image_proxy = cls._fields['images'].field.get_proxy_obj('images',
                                                                     media)
             image_proxy.put(io)
@@ -54,7 +53,7 @@ class Media(Document):
         return media.save()
 
     @classmethod
-    def update_media(cls, media_id, image_file):
+    def update(cls, media_id, image_file):
         medium = cls.objects.get_or_404(id=media_id, owner=g.user)
 
         if not image_file:
@@ -67,11 +66,11 @@ class Media(Document):
         medium.save()
 
     @classmethod
-    def delete_media(cls, media_id):
+    def delete(cls, media_id):
         pass
 
     @classmethod
-    def create_item_media(cls, item):
+    def create_from_item(cls, item):
         for media in Media.objects(id__in=item.media, item__not__exists=True,
                                    owner=g.user):
             media.item = item.id
@@ -81,9 +80,9 @@ class Media(Document):
         item.save()
 
     @classmethod
-    def update_item_media(cls, item, update_item):
+    def update_from_item(cls, item, update_item):
         pass
 
     @classmethod
-    def delete_item_media(cls, item):
+    def delete_from_item(cls, item):
         pass

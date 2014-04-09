@@ -42,11 +42,11 @@ class ItemDetails(Resource):
 
     @staticmethod
     def put(item_id):
-        return Item.update_item(item_id, **get_request_json())
+        return Item.update(item_id, **get_request_json())
 
     @staticmethod
     def delete(item_id):
-        Item.delete_item(item_id)
+        Item.delete(item_id)
 
         return '', 204
 
@@ -56,4 +56,4 @@ class ItemList(Resource):
 
     @staticmethod
     def post():
-        return Item.create_item(**get_request_json()), 201
+        return Item.create(**get_request_json()), 201
