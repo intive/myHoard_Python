@@ -38,7 +38,7 @@ class MediaDetails(Resource):
     def delete(media_id):
         medium = Media.objects.get_or_404(id=media_id)
         medium.image.delete()
-        medium.delete()
+        medium.delete_()
 
         return '', 204
 

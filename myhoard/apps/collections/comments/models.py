@@ -39,7 +39,7 @@ class Comment(Document):
         return comment.save()
 
     @classmethod
-    def delete(cls, comment_id):
+    def delete_(cls, comment_id):
         comment = cls.objects.get_or_404(id=comment_id)
         collection = Collection.objects.get_or_404(id=comment.collection)
         if g.user != comment.owner or g.user != collection.owner:

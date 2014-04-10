@@ -46,7 +46,7 @@ class ItemDetails(Resource):
 
     @staticmethod
     def delete(item_id):
-        Item.delete(item_id)
+        Item.delete_(item_id)
 
         return '', 204
 

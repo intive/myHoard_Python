@@ -37,7 +37,7 @@ class CollectionDetails(Resource):
 
     @staticmethod
     def delete(collection_id):
-        Collection.delete(collection_id)
+        Collection.delete_(collection_id)
 
         return '', 204
 

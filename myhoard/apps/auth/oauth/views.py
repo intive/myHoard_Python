@@ -12,7 +12,7 @@ token_fields = {
     'access_token': fields.String,
     'expires_in': fields.Integer(current_app.config['AUTH_KEEP_ALIVE_TIME']),
     'refresh_token': fields.String,
-    'user_id': fields.String,
+    'user_id': fields.String(attribute='user'),
 }
 
 

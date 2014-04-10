@@ -52,7 +52,7 @@ class Item(Document):
         return update_item.save()
 
     @classmethod
-    def delete(cls, item_id):
+    def delete_(cls, item_id):
         item = cls.objects.get_or_404(id=item_id, owner=g.user)
 
         Media.delete_from_item(item)

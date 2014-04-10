@@ -29,7 +29,7 @@ class CommentDetails(Resource):
 
     @staticmethod
     def delete(comment_id):
-        Comment.delete(comment_id)
+        Comment.delete_(comment_id)
 
         return '', 204
 

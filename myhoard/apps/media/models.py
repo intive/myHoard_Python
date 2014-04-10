@@ -66,7 +66,7 @@ class Media(Document):
         medium.save()
 
     @classmethod
-    def delete(cls, media_id):
+    def delete_(cls, media_id):
         pass
 
     @classmethod

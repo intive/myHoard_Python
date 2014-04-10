@@ -49,7 +49,7 @@ class Collection(Document):
         return update_collection.save()
 
     @classmethod
-    def delete(cls, collection_id):
+    def delete_(cls, collection_id):
         collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
         Item.delete_from_collection(collection)
 
