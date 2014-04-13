@@ -1,5 +1,6 @@
 from uuid import uuid4
 from datetime import datetime
+import logging
 
 from werkzeug.security import check_password_hash
 from werkzeug.exceptions import Forbidden
@@ -10,6 +11,8 @@ from mongoengine import UUIDField, ObjectIdField, DateTimeField, \
     DoesNotExist
 
 from myhoard.apps.auth.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class Token(Document):
@@ -54,3 +57,11 @@ class Token(Document):
         token.created = None
 
         return token.save()
+
+    @classmethod
+    def delete_user_tokens(cls, user_id):
+        tokens = cls.objects(user=user_id)
+
+        for token in tokens:
+            logger.debug('deleting token... tokenID: {0}'.format(token.id))
+            token.delete()

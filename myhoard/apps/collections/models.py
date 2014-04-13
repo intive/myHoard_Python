@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 from flask import g
 from flask.ext.mongoengine import Document
@@ -8,6 +9,8 @@ from mongoengine import StringField, ListField, ObjectIdField, \
 from myhoard.apps.common.utils import make_order_by_for_query
 
 from items.models import Item
+
+logger = logging.getLogger(__name__)
 
 
 class Collection(Document):
@@ -54,6 +57,13 @@ class Collection(Document):
         Item.delete_from_collection(collection)
 
         return collection.delete()
+
+    @classmethod
+    def delete_by_user(cls, user_id):
+        for collection in cls.objects(owner=user_id):
+            logger.debug('deleting collection... collectionID: {0} collection name: {1}'
+                         .format(collection.id, collection.name))
+            collection.delete_(collection.id)
 
     @classmethod
     def get_ordered(cls, params):

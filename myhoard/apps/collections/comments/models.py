@@ -17,7 +17,7 @@ class Comment(Document):
     owner = ObjectIdField()
 
     def __repr__(self):
-        return '<Comment {}>'.format(self.body)
+        return '<Comment {}>'.format(self.content)
 
     @classmethod
     def create(cls, **kwargs):
@@ -29,14 +29,6 @@ class Comment(Document):
         logger.debug("comment with id: %s created" % comment.id)
 
         return comment
-
-    @classmethod
-    def update(cls, comment_id, **kwargs):
-        comment = cls.objects.get_or_404(id=comment_id, owner=g.user)
-        update_comment = cls(**kwargs)
-        comment.body = update_comment.body
-
-        return comment.save()
 
     @classmethod
     def delete_(cls, comment_id):
