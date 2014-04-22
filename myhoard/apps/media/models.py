@@ -77,12 +77,12 @@ class Media(Document):
 
         logger.debug('before media update - itemID: {0} item media: {1}'.format(item.id, item.media))
 
-        for media in Media.objects(id__in=item.media, item__not__exists=True, owner=g.user):
+        for media in cls.objects(id__in=item.media, item__not__exists=True, owner=g.user):
             media.item = item.id
             media.save()
 
         #item.media = list(Media.objects(item=item.id))
-        item.media = Media.objects(item=item.id).scalar('id')
+        item.media = cls.objects(item=item.id).scalar('id')
 
         logger.debug('after media update - itemID: {0} item media: {1}'.format(item.id, item.media))
 

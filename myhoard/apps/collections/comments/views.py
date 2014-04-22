@@ -24,10 +24,6 @@ class CommentDetails(Resource):
         return Comment.objects.get_or_404(id=comment_id)
 
     @staticmethod
-    def put(comment_id):
-        return Comment.update(comment_id, **get_request_json())
-
-    @staticmethod
     def delete(comment_id):
         Comment.delete_(comment_id)
 
