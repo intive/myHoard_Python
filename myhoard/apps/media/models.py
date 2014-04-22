@@ -1,11 +1,14 @@
 from datetime import datetime
 from PIL import Image, ImageOps
+import logging
 
 from flask import current_app, g
 from flask.ext.mongoengine import Document
 from mongoengine import MapField, ImageField, DateTimeField, \
     ObjectIdField, ValidationError
 from mongoengine.python_support import StringIO
+
+logger = logging.getLogger(__name__)
 
 
 class Media(Document):
@@ -71,12 +74,18 @@ class Media(Document):
 
     @classmethod
     def create_from_item(cls, item):
-        for media in Media.objects(id__in=item.media, item__not__exists=True,
-                                   owner=g.user):
+
+        logger.debug('before media update - itemID: {0} item media: {1}'.format(item.id, item.media))
+
+        for media in Media.objects(id__in=item.media, item__not__exists=True, owner=g.user):
             media.item = item.id
             media.save()
 
-        item.media = list(Media.objects(item=item.id))
+        #item.media = list(Media.objects(item=item.id))
+        item.media = Media.objects(item=item.id).scalar('id')
+
+        logger.debug('after media update - itemID: {0} item media: {1}'.format(item.id, item.media))
+
         item.save()
 
     @classmethod
