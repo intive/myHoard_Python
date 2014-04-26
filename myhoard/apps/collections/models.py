@@ -4,7 +4,7 @@ import logging
 from flask import g
 from flask.ext.mongoengine import Document
 from mongoengine import StringField, ListField, ObjectIdField, \
-    DateTimeField, BooleanField
+    DateTimeField, BooleanField, Q
 
 from myhoard.apps.common.utils import make_order_by_for_query
 
@@ -67,5 +67,5 @@ class Collection(Document):
 
     @classmethod
     def get_ordered(cls, params):
-        return cls.objects(owner=g.user).order_by(
-            *make_order_by_for_query(params))
+        # Q(owner=g.user) | Q(public=True) - get my collections and public collections
+        return cls.objects(Q(owner=g.user) | Q(public=True)).order_by(*make_order_by_for_query(params))
