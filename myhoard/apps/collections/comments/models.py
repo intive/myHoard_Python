@@ -35,7 +35,7 @@ class Comment(Document):
         comment = cls.objects.get_or_404(id=comment_id)
         collection = Collection.objects.get_or_404(id=comment.collection)
         if g.user != comment.owner or g.user != collection.owner:
-            logger.info("User does not have permission to remove this comment")
+            logger.debug("current user does not have permission to remove comment with id: " % comment_id)
             raise Forbidden()
 
         return comment.delete()

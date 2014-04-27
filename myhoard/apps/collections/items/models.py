@@ -2,17 +2,16 @@ from datetime import datetime
 
 from flask import g
 from flask.ext.mongoengine import Document
-from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, \
-    GeoPointField
+from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, PointField
 
 from myhoard.apps.media.models import Media
-from myhoard.apps.common.utils import make_order_by_for_query
+from myhoard.apps.common.utils import make_order_by_for_query, make_item_search_query
 
 
 class Item(Document):
     name = StringField(min_length=3, max_length=50, required=True)
     description = StringField(max_length=250, default='')
-    location = GeoPointField()
+    location = PointField()
     created_date = DateTimeField(default=datetime.now)
     modified_date = DateTimeField(default=datetime.now)
     media = ListField(ObjectIdField())
@@ -31,7 +30,10 @@ class Item(Document):
         item.owner = g.user
 
         if 'location' in item:
-            item.location = (item.location.get('lat'), item.location.get('lng'))
+            item.location = {
+                "type": "Point",
+                "coordinates": [item.location.get('lat'), item.location.get('lng')]
+            }
 
         item.save()
 
@@ -46,6 +48,13 @@ class Item(Document):
         update_item.id = item.id
         update_item.created_date = item.created_date
         update_item.modified_date = None
+        update_item.owner = g.user
+
+        if 'location' in update_item:
+            update_item.location = {
+                "type": "Point",
+                "coordinates": [update_item.location.get('lat'), update_item.location.get('lng')]
+            }
 
         Media.update_from_item(item, update_item)
 
@@ -67,6 +76,5 @@ class Item(Document):
             item.delete()
 
     @classmethod
-    def get_ordered(cls, params, collection_id):
-        return cls.objects(owner=g.user, collection=collection_id).order_by(
-            *make_order_by_for_query(params))
+    def get_all(cls, params, collection_id):
+        return cls.objects(make_item_search_query(params, collection_id)).order_by(*make_order_by_for_query(params))

@@ -1,5 +1,6 @@
-from flask import request
+from flask import request, g
 from flask.ext.restful import Resource, marshal_with, fields
+from mongoengine import Q
 
 from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
@@ -51,7 +52,7 @@ class CollectionList(Resource):
 
     @staticmethod
     def get():
-        return list(Collection.get_ordered(request.values))
+        return list(Collection.get_all(request.values))
 
 
 class CollectionItemList(Resource):
@@ -59,8 +60,8 @@ class CollectionItemList(Resource):
 
     @staticmethod
     def get(collection_id):
-        Collection.objects.get_or_404(id=collection_id)
-        return list(Item.get_ordered(request.values, collection_id))
+        Collection.objects.get_or_404(Q(id=collection_id) & (Q(owner=g.user) | Q(public=True)))
+        return list(Item.get_all(request.values, collection_id))
 
 
 class CollectionCommentList(Resource):

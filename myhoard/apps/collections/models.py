@@ -4,9 +4,9 @@ import logging
 from flask import g
 from flask.ext.mongoengine import Document
 from mongoengine import StringField, ListField, ObjectIdField, \
-    DateTimeField, BooleanField, Q
+    DateTimeField, BooleanField
 
-from myhoard.apps.common.utils import make_order_by_for_query
+from myhoard.apps.common.utils import make_order_by_for_query, make_collection_search_query
 
 from items.models import Item
 
@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Collection(Document):
-    name = StringField(min_length=3, max_length=20, required=True,
-                       unique_with='owner')
+    name = StringField(min_length=3, max_length=20, required=True, unique_with='owner')
     description = StringField(default='')
     tags = ListField(StringField(min_length=3, max_length=20))
     created_date = DateTimeField(default=datetime.now)
@@ -66,6 +65,5 @@ class Collection(Document):
             collection.delete_(collection.id)
 
     @classmethod
-    def get_ordered(cls, params):
-        # Q(owner=g.user) | Q(public=True) - get my collections and public collections
-        return cls.objects(Q(owner=g.user) | Q(public=True)).order_by(*make_order_by_for_query(params))
+    def get_all(cls, params):
+        return cls.objects(make_collection_search_query(params)).order_by(*make_order_by_for_query(params))
