@@ -79,7 +79,7 @@ def make_item_search_query(params, collection_id):
     if geo:
         max_range = float(params.get('max_range', 10000))
         geo = geo.split(',')
-        location = {'lng': float(geo[0]), 'lat': float(geo[1])}
+        location = {'lat': float(geo[0]), 'lng': float(geo[1])}
 
         # http://docs.mongodb.org/manual/reference/operator/query/near/
         raw_queries['location'] = {

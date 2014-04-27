@@ -32,7 +32,7 @@ class Item(Document):
         if 'location' in item:
             item.location = {
                 "type": "Point",
-                "coordinates": [item.location.get('lat'), item.location.get('lng')]
+                "coordinates": [item.location.get('lng'), item.location.get('lat')]
             }
 
         item.save()
@@ -53,7 +53,7 @@ class Item(Document):
         if 'location' in update_item:
             update_item.location = {
                 "type": "Point",
-                "coordinates": [update_item.location.get('lat'), update_item.location.get('lng')]
+                "coordinates": [update_item.location.get('lng'), update_item.location.get('lat')]
             }
 
         Media.update_from_item(item, update_item)
