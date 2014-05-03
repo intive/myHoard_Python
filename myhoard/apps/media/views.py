@@ -11,7 +11,7 @@ media_fields = {
 
 
 class MediaDetails(Resource):
-    #method_decorators = [login_required]
+    method_decorators = [login_required]
 
     @staticmethod
     def get(media_id):
@@ -32,13 +32,11 @@ class MediaDetails(Resource):
     @staticmethod
     @marshal_with(media_fields)
     def put(media_id):
-        return Media.update(media_id, request.files.get('image'))
+        return Media.put(media_id, request.files.get('image'))
 
     @staticmethod
     def delete(media_id):
-        medium = Media.objects.get_or_404(id=media_id)
-        medium.image.delete()
-        medium.delete_()
+        Media.delete(media_id)
 
         return '', 204
 

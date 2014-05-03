@@ -9,9 +9,24 @@ from decorators import json_response
 
 logger = logging.getLogger(__name__)
 
+
+class UnauthorizedBadCredentials(Unauthorized):
+    pass
+
+
+class UnauthorizedNoToken(Unauthorized):
+    pass
+
+
+class UnauthorizedTokenInvalid(Unauthorized):
+    pass
+
+
 _custom_error_mapping = {
     #error_code, http_code, error_message
-    Unauthorized: (102, 401, 'Auth method not provided'),
+    UnauthorizedBadCredentials: (101, 401, 'Bad credentials'),
+    UnauthorizedNoToken: (102, 401, 'Token not provided'),
+    UnauthorizedTokenInvalid: (103, 401, 'Invalid token'),
     Forbidden: (104, 403, 'Forbidden'),
     ValidationError: (201, 400, 'Validation error'),
     NotUniqueError: (201, 400, 'Validation error'),
@@ -23,10 +38,10 @@ _duplicate_re = re.compile(r'\$(.+?)_')
 
 @json_response
 def handle_custom_errors(e):
-    logger.error(e)
-
     error_type = type(e)
     if error_type in _custom_error_mapping:
+        logger.debug(e) # just typical exception to handle
+
         error_code, http_code, error_message = _custom_error_mapping[error_type]
 
         resp = {
@@ -50,7 +65,9 @@ def handle_custom_errors(e):
 
         return resp, http_code
     else:
+        logger.exception(e) # everything is on fire, panic is only solution
+
         return {
-            'error_code': 301,
-            'error_message': e.message,
-        }, 500
+                   'error_code': 301,
+                   'error_message': 'Unexpected server exception: {}'.format(e),
+               }, 500

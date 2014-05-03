@@ -1,4 +1,4 @@
-from flask import url_for, request
+from flask import url_for
 from flask.ext.restful import Resource, marshal_with, fields
 
 from myhoard.apps.common.utils import get_request_json
@@ -16,7 +16,8 @@ class MediaField(fields.Raw):
     @staticmethod
     def format(media_id):
         return {'id': str(media_id),
-                'url': url_for('mediadetails', media_id=media_id, _external=True)}
+                'url': url_for('mediadetails', media_id=media_id,
+                               _external=True)}
 
 
 item_fields = {
@@ -41,11 +42,15 @@ class ItemDetails(Resource):
 
     @staticmethod
     def put(item_id):
-        return Item.update(item_id, **get_request_json())
+        return Item.put(item_id, **get_request_json())
+
+    @staticmethod
+    def patch(item_id):
+        return Item.patch(item_id, **get_request_json())
 
     @staticmethod
     def delete(item_id):
-        Item.delete_(item_id)
+        Item.delete(item_id)
 
         return '', 204
 

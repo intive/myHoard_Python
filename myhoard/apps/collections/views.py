@@ -34,11 +34,15 @@ class CollectionDetails(Resource):
 
     @staticmethod
     def put(collection_id):
-        return Collection.update(collection_id, **get_request_json())
+        return Collection.put(collection_id, **get_request_json())
+
+    @staticmethod
+    def patch(collection_id):
+        return Collection.put(collection_id, **get_request_json())
 
     @staticmethod
     def delete(collection_id):
-        Collection.delete_(collection_id)
+        Collection.delete(collection_id)
 
         return '', 204
 

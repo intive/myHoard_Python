@@ -34,33 +34,48 @@ class User(Document):
         return user.save()
 
     @classmethod
-    def update(cls, user_id, **kwargs):
+    def put(cls, user_id, **kwargs):
         user = cls.objects.get_or_404(id=user_id)
         update_user = cls(**kwargs)
 
-        if not user.username:
-            update_user.username = user.email
+        return cls.update(user, update_user)
 
-        if user.password:
-            update_user.password = generate_password_hash(update_user.password)
+    @classmethod
+    def patch(cls, user_id, **kwargs):
+        user = cls.objects.get_or_404(id=user_id)
+        update_user = cls()
 
+        for field in user._fields:
+            update_user[field] = kwargs.get(field, user[field])
+
+        return cls.update(user, update_user)
+
+    @classmethod
+    def update(cls, user, update_user):
         update_user.id = user.id
+
+        if not update_user.username:
+            update_user.username = update_user.email
+
+        if update_user.password:
+            update_user.password = generate_password_hash(user.password)
 
         return update_user.save()
 
     @classmethod
-    def delete_(cls, user_id):
+    def delete(cls, user_id):
         user = cls.objects.get_or_404(id=user_id)
         if g.user != user.id:
-            logger.info("user does not have permission to remove other user")
+            logger.info('user does not have permission to remove other user')
             raise Forbidden()
 
-        logger.debug("deleting user collections")
+        logger.debug('deleting user collections')
         Collection.delete_by_user(user.id)
 
-        logger.debug("deleting user tokens")
+        logger.debug('deleting user tokens')
         from myhoard.apps.auth.oauth.models import Token
+
         Token.delete_user_tokens(user.id)
 
-        logger.debug("deleting user")
-        return user.delete()
+        logger.debug('deleting user')
+        return super(cls, user).delete()

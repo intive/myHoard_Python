@@ -1,7 +1,5 @@
 from functools import wraps
 
-from werkzeug.exceptions import Unauthorized
-
 from flask import current_app
 
 from myhoard.apps.common.utils import load_class
@@ -22,14 +20,8 @@ def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         for auth_class in _auth_classes:
-            try:
-                auth_class.authenticate()
-            except Unauthorized:
-                continue
-            else:
-                return f(*args, **kwargs)
+            auth_class.authenticate()
 
-        # When all methods are checked and we still here - no auth provided
-        raise Unauthorized()
+        return f(*args, **kwargs)
 
     return wrapper

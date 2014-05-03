@@ -3,14 +3,14 @@ from datetime import datetime
 import logging
 
 from werkzeug.security import check_password_hash
-from werkzeug.exceptions import Forbidden
 
 from flask import current_app
 from flask.ext.mongoengine import Document
 from mongoengine import UUIDField, ObjectIdField, DateTimeField, \
-    DoesNotExist
+    DoesNotExist, ValidationError
 
 from myhoard.apps.auth.models import User
+from myhoard.apps.common.errors import UnauthorizedBadCredentials
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +31,24 @@ class Token(Document):
     }
 
     @classmethod
-    def create(cls, email='', password=''):
+    def create(cls, email, password):
+        errors = {}
+        if not email:
+            errors['email'] = 'Field is required'
+
+        if not password:
+            errors['password'] = 'Field is required'
+
+        if errors:
+            raise ValidationError(errors=errors)
+
         try:
             user = User.objects.get(email=email)
         except DoesNotExist:
-            raise Forbidden()
+            raise UnauthorizedBadCredentials('Login failed')
 
         if not check_password_hash(user.password, password):
-            raise Forbidden()
+            raise UnauthorizedBadCredentials('Login failed')
 
         token = cls(access_token=uuid4(), refresh_token=uuid4(), user=user.id)
 
@@ -46,11 +56,21 @@ class Token(Document):
 
     @classmethod
     def refresh(cls, access_token='', refresh_token=''):
+        errors = {}
+        if not access_token:
+            errors['access_token'] = 'Field is required'
+
+        if not refresh_token:
+            errors['refresh_token'] = 'Field is required'
+
+        if errors:
+            raise ValidationError(errors=errors)
+
         try:
             token = Token.objects.get(access_token=access_token,
                                       refresh_token=refresh_token)
         except (ValueError, DoesNotExist):
-            raise Forbidden()
+            raise UnauthorizedBadCredentials('Login failed')
 
         token.access_token = uuid4()
         token.refresh_token = uuid4()

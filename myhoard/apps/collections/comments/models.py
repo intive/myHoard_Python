@@ -26,7 +26,7 @@ class Comment(Document):
         comment.owner = g.user
         comment.save()
 
-        logger.debug("comment with id: %s created" % comment.id)
+        logger.debug('comment with id: {} created'.format(comment.id))
 
         return comment
 
@@ -35,7 +35,10 @@ class Comment(Document):
         comment = cls.objects.get_or_404(id=comment_id)
         collection = Collection.objects.get_or_404(id=comment.collection)
         if g.user != comment.owner or g.user != collection.owner:
-            logger.debug("current user does not have permission to remove comment with id: " % comment_id)
-            raise Forbidden()
+            logger.debug(
+                'current user does not have permission to remove comment with id: {}'.format(
+                    comment_id))
+            raise Forbidden(
+                'Only comment or collection owner can delete comments')
 
         return comment.delete()

@@ -6,7 +6,8 @@ from flask.ext.mongoengine import Document
 from mongoengine import StringField, ListField, ObjectIdField, \
     DateTimeField, BooleanField
 
-from myhoard.apps.common.utils import make_order_by_for_query, make_collection_search_query
+from myhoard.apps.common.utils import make_order_by_for_query, \
+    make_collection_search_query
 
 from items.models import Item
 
@@ -14,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 class Collection(Document):
-    name = StringField(min_length=3, max_length=20, required=True, unique_with='owner')
+    name = StringField(min_length=3, max_length=20, required=True,
+                       unique_with='owner')
     description = StringField(default='')
     tags = ListField(StringField(min_length=3, max_length=20))
     created_date = DateTimeField(default=datetime.now)
@@ -40,30 +42,49 @@ class Collection(Document):
         return collection.save()
 
     @classmethod
-    def update(cls, collection_id, **kwargs):
+    def put(cls, collection_id, **kwargs):
         collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
         update_collection = cls(**kwargs)
+
+        return cls.update(collection, update_collection)
+
+    @classmethod
+    def patch(cls, collection_id, **kwargs):
+        collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
+        update_collection = cls()
+
+        for field in collection._fields:
+            update_collection[field] = kwargs.get(field, collection[field])
+
+        return cls.update(collection, update_collection)
+
+    @classmethod
+    def update(cls, collection, update_collection):
         update_collection.id = collection.id
         update_collection.created_date = collection.created_date
         update_collection.modified_date = None
         update_collection.owner = collection.owner
 
-        return update_collection.save()
+        return super(cls, update_collection).save()
 
     @classmethod
-    def delete_(cls, collection_id):
+    def delete(cls, collection_id):
         collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
+
+        super(cls, collection).delete()
         Item.delete_from_collection(collection)
 
-        return collection.delete()
+        return collection
 
     @classmethod
     def delete_by_user(cls, user_id):
         for collection in cls.objects(owner=user_id):
-            logger.debug('deleting collection... collectionID: {0} collection name: {1}'
-                         .format(collection.id, collection.name))
-            collection.delete_(collection.id)
+            logger.debug(
+                'deleting collection... collectionID: {} collection name: {}'
+                .format(collection.id, collection.name))
+            collection.delete(collection.id)
 
     @classmethod
     def get_all(cls, params):
-        return cls.objects(make_collection_search_query(params)).order_by(*make_order_by_for_query(params))
+        return cls.objects(make_collection_search_query(params)).order_by(
+            *make_order_by_for_query(params))

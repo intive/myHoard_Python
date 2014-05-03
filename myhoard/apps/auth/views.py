@@ -22,11 +22,15 @@ class UserDetails(Resource):
 
     @staticmethod
     def put(user_id):
-        return User.update(user_id, **get_request_json())
+        return User.put(user_id, **get_request_json())
+
+    @staticmethod
+    def patch(user_id):
+        return User.patch(user_id, **get_request_json())
 
     @staticmethod
     def delete(user_id):
-        User.delete_(user_id)
+        User.delete(user_id)
         return '', 204
 
 

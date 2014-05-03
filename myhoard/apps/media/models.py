@@ -22,17 +22,6 @@ class Media(Document):
 
     @classmethod
     def create(cls, image_file):
-        def put_image(image_obj, index):
-            io = StringIO()
-            image_obj.save(io, image_format)
-            io.seek(0)
-
-            image_proxy = cls._fields['images'].field.get_proxy_obj('images',
-                                                                    media)
-            image_proxy.put(io)
-
-            media.images[index] = image_proxy
-
         if not image_file:
             raise ValidationError(errors={'image': 'Field is required'})
 
@@ -44,47 +33,72 @@ class Media(Document):
         try:
             image = Image.open(image_file)
             image_format = image.format
-        except:
-            raise ValidationError(errors={'image': 'Unsupported image type'})
+        except IOError:
+            raise ValidationError(
+                errors={'image': 'No PIL drivers for that file type'})
 
         for size in current_app.config['IMAGE_THUMBNAIL_SIZES']:
-            put_image(ImageOps.fit(image, (size, size), Image.ANTIALIAS),
-                      str(size))
+            cls.save_image_in_mapfield(
+                ImageOps.fit(image, (size, size), Image.ANTIALIAS),
+                image_format, media, str(size))
 
-        put_image(image, 'master')
+        # since image is source stream for thumbnails
+        # we are forced to save original image last
+        cls.save_image_in_mapfield(image, image_format, media, 'master')
 
         return media.save()
 
     @classmethod
-    def update(cls, media_id, image_file):
-        medium = cls.objects.get_or_404(id=media_id, owner=g.user)
+    def put(cls, media_id, image_file):
+        media = cls.objects.get_or_404(id=media_id, owner=g.user)
 
+        return cls.update(media, image_file)
+
+    @classmethod
+    def update(cls, media, image_file):
         if not image_file:
             raise ValidationError(errors={'image': 'Field is required'})
 
-        image = image_file
+        # TODO: Fix this
+        media.image.delete()
+        media.image = image_file
 
-        medium.image.delete()
-        medium.image = image
-        medium.save()
+        media.save()
+        # TODO: Cascade update here
+
+        return media
 
     @classmethod
-    def delete_(cls, media_id):
-        pass
+    def delete(cls, media_id):
+        media = Media.objects.get_or_404(id=media_id)
+        # TODO: Fix this
+        media.image.delete()
+
+        return super(cls, media).delete()
+
+    # Super elastic workaround cost a little advanced usage
+    # https://github.com/MongoEngine/mongoengine/issues/382
+    # https://github.com/MongoEngine/mongoengine/pull/391
+    @classmethod
+    def save_image_in_mapfield(cls, image_obj, image_format, instance, index):
+        io = StringIO()
+        image_obj.save(io, image_format)
+        io.seek(0)
+
+        image_proxy = cls._fields['images'].field.get_proxy_obj('images',
+                                                                instance)
+        image_proxy.put(io)
+
+        instance.images[index] = image_proxy
 
     @classmethod
     def create_from_item(cls, item):
-
-        logger.debug('before media update - itemID: {0} item media: {1}'.format(item.id, item.media))
-
-        for media in cls.objects(id__in=item.media, item__not__exists=True, owner=g.user):
+        for media in cls.objects(id__in=item.media, item__not__exists=True,
+                                 owner=g.user):
             media.item = item.id
             media.save()
 
-        #item.media = list(Media.objects(item=item.id))
         item.media = cls.objects(item=item.id).scalar('id')
-
-        logger.debug('after media update - itemID: {0} item media: {1}'.format(item.id, item.media))
 
         item.save()
 

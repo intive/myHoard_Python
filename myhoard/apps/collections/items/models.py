@@ -2,10 +2,12 @@ from datetime import datetime
 
 from flask import g
 from flask.ext.mongoengine import Document
-from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, PointField
+from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, \
+    PointField
 
 from myhoard.apps.media.models import Media
-from myhoard.apps.common.utils import make_order_by_for_query, make_item_search_query
+from myhoard.apps.common.utils import make_order_by_for_query, \
+    make_item_search_query
 
 
 class Item(Document):
@@ -32,19 +34,34 @@ class Item(Document):
         if 'location' in item:
             item.location = {
                 "type": "Point",
-                "coordinates": [item.location.get('lng'), item.location.get('lat')]
+                "coordinates": [item.location.get('lng'),
+                                item.location.get('lat')]
             }
 
         item.save()
-
         Media.create_from_item(item)
 
         return item
 
     @classmethod
-    def update(cls, item_id, **kwargs):
+    def put(cls, item_id, **kwargs):
         item = cls.objects.get_or_404(id=item_id, owner=g.user)
         update_item = cls(**kwargs)
+
+        return cls.update(item, update_item)
+
+    @classmethod
+    def patch(cls, item_id, **kwargs):
+        item = cls.objects.get_or_404(id=item_id, owner=g.user)
+        update_item = cls()
+
+        for field in item._fields:
+            update_item[field] = kwargs.get(field, item[field])
+
+        return cls.update(item, update_item)
+
+    @classmethod
+    def update(cls, item, update_item):
         update_item.id = item.id
         update_item.created_date = item.created_date
         update_item.modified_date = None
@@ -53,20 +70,23 @@ class Item(Document):
         if 'location' in update_item:
             update_item.location = {
                 "type": "Point",
-                "coordinates": [update_item.location.get('lng'), update_item.location.get('lat')]
+                "coordinates": [update_item.location.get('lng'),
+                                update_item.location.get('lat')]
             }
 
+        update_item.save()
         Media.update_from_item(item, update_item)
 
-        return update_item.save()
+        return update_item
 
     @classmethod
-    def delete_(cls, item_id):
+    def delete(cls, item_id):
         item = cls.objects.get_or_404(id=item_id, owner=g.user)
 
+        super(cls, item).delete()
         Media.delete_from_item(item)
 
-        return item.delete()
+        return item
 
     @classmethod
     def delete_from_collection(cls, collection):
@@ -77,4 +97,6 @@ class Item(Document):
 
     @classmethod
     def get_all(cls, params, collection_id):
-        return cls.objects(make_item_search_query(params, collection_id)).order_by(*make_order_by_for_query(params))
+        return cls.objects(
+            make_item_search_query(params, collection_id)).order_by(
+            *make_order_by_for_query(params))
