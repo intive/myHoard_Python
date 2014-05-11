@@ -50,8 +50,8 @@ def make_order_by_for_query(params):
 def make_collection_search_query(params):
     """Returns collection search query"""
     raw_queries = {
-        'name': {'$regex': params.get('name')},
-        'description': {'$regex': params.get('description')},
+        'name': {'$regex': params.get('name'), '$options': 'i'},
+        'description': {'$regex': params.get('description'), '$options': 'i'},
         '$or': [
             {'owner': g.user}, {'public': True}
         ]
@@ -69,8 +69,8 @@ def make_collection_search_query(params):
 def make_item_search_query(params, collection_id):
     """Returns item search query"""
     raw_queries = {
-        'name': {'$regex': params.get('name')},
-        'description': {'$regex': params.get('description')},
+        'name': {'$regex': params.get('name'), '$options': 'i'},
+        'description': {'$regex': params.get('description'), '$options': 'i'},
         'collection': collection_id
     }
 
