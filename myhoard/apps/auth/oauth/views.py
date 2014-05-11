@@ -12,7 +12,7 @@ token_fields = {
     'access_token': fields.String,
     'expires_in': fields.Integer(current_app.config['AUTH_KEEP_ALIVE_TIME']),
     'refresh_token': fields.String,
-    'user_id': fields.String(attribute='user'),
+    'user_id': fields.String(attribute='owner'),
 }
 
 
@@ -24,11 +24,12 @@ def oauth():
         raise ValidationError(errors={'grant_type': 'Field is required'})
 
     if args.get('grant_type') == 'password':
-        return marshal(
-            Token.create(args.get('email'), args.get('password')),
-            token_fields), 200
+        return marshal(Token.create(args.get('email'), args.get('password')), token_fields), 200
     elif args.get('grant_type') == 'refresh_token':
-        return login_required(marshal_with(token_fields)(Token.refresh))(
-            args.get('access_token'), args.get('refresh_token')), 200
+        # Manual function decorating, since we can't use @ method
+        return login_required(
+            marshal_with(token_fields)(Token.refresh) # Token.refresh is target function to wrap
+        )(args.get('access_token'), args.get('refresh_token')), 200 # Here we are calling wrapped function
+                                                                    # and returning result with 200 htpp code
     else:
         raise ValidationError(errors={'grant_type': 'Unsupported grant_type'})

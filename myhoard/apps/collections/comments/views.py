@@ -1,4 +1,5 @@
 import logging
+
 from flask.ext.restful import Resource, marshal_with, fields
 
 from myhoard.apps.common.utils import get_request_json
@@ -25,7 +26,7 @@ class CommentDetails(Resource):
 
     @staticmethod
     def delete(comment_id):
-        Comment.delete_(comment_id)
+        Comment.delete(comment_id)
 
         return '', 204
 

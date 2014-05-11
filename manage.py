@@ -14,8 +14,7 @@ def create_app():
     # Settings
     settings_module_name = os.environ.get('MYHOARD_SETTINGS_MODULE')
     if not settings_module_name:
-        raise EnvironmentError(
-            "Could not import settings, MYHOARD_SETTINGS_MODULE is None")
+        raise EnvironmentError('Could not import settings, MYHOARD_SETTINGS_MODULE is None')
     app.config.from_object(settings_module_name)
 
     # Converters
@@ -27,7 +26,7 @@ def create_app():
     logging.config.dictConfig(app.config['LOGGING'])
 
     logger = logging.getLogger(__name__)
-    logger.info("app created")
+    logger.info('app created')
 
     # Mongoengine
     app.db = MongoEngine(app)
@@ -52,5 +51,5 @@ def create_app():
 
 manager = Manager(create_app)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     manager.run()

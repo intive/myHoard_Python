@@ -10,32 +10,38 @@ logger = logging.getLogger(__name__)
 
 
 def get_request_json():
-    """returns parsed JSON data from flask request, throws ValidationError on fail"""
+    '''Returns parsed JSON data from flask request, throws ValidationError on fail'''
     json = request.get_json(silent=True)
     if not json:
         raise ValidationError('No incoming JSON data')
+
+    logger.debug('get_request_json dump:\njson: {}'.format(json))
 
     return json
 
 
 def load_class(path):
-    """Dynamically loads and returns class from given path"""
+    '''Dynamically loads and returns class from given path'''
     mod, cls = path.rsplit('.', 1)
     mod = import_module(mod)
+
+    logger.debug('load_class dump:\nmod: {}\ncls: {}'.format(mod, cls))
+
     return getattr(mod, cls)
 
 
 def string_to_object_id(string_id):
-    """Convert string id to ObjectId"""
+    '''Convert string id to ObjectId'''
     try:
         return ObjectId(string_id)
     except InvalidId:
-        logger.debug('string id: {0} is invalid'.format(string_id))
+        logger.debug('string_to_object_id dump:\nstring_id: {}\nInvalidId!'.format(string_id))
+
         return None
 
 
 def make_order_by_for_query(params):
-    """Returns mongolike sort_by prefixed with directions from given flask params"""
+    '''Returns mongolike sort_by prefixed with directions from given flask params'''
     directions = {'asc': '+', 'desc': '-'}
 
     sort_by = params.getlist('sort_by')
@@ -44,11 +50,13 @@ def make_order_by_for_query(params):
     direction = directions.get(sort_direction, '+')
     order_by = [direction + s for s in sort_by]
 
+    logger.debug('make_order_by_for_query dump:\norder_by: {}'.format(order_by))
+
     return order_by
 
 
 def make_collection_search_query(params):
-    """Returns collection search query"""
+    '''Returns collection search query'''
     raw_queries = {
         'name': {'$regex': params.get('name'), '$options': 'i'},
         'description': {'$regex': params.get('description'), '$options': 'i'},
@@ -61,22 +69,22 @@ def make_collection_search_query(params):
     if owner:
         raw_queries['owner'] = string_to_object_id(owner)
 
-    logger.debug('make_collection_search_query\n owner: {0}\n raw_queries: {1}'.format(owner, raw_queries))
+    logger.debug('make_collection_search_query dump:\nowner: {}\nraw_queries: {}'.format(owner, raw_queries))
 
     return Q(__raw__=raw_queries)
 
 
 def make_item_search_query(params, collection_id):
-    """Returns item search query"""
+    '''Returns item search query'''
     raw_queries = {
         'name': {'$regex': params.get('name'), '$options': 'i'},
         'description': {'$regex': params.get('description'), '$options': 'i'},
         'collection': collection_id
     }
 
-    # geolocation search
-    geo = params.get('geo')
-    if geo:
+    # Geolocation search
+    if 'geo' in params:
+        geo = params.get('geo')
         max_range = float(params.get('max_range', 10000))
         geo = geo.split(',')
         location = {'lat': float(geo[0]), 'lng': float(geo[1])}
@@ -92,6 +100,8 @@ def make_item_search_query(params, collection_id):
             }
         }
 
-    logger.debug('make_item_search_query\n geo: {0}\n raw_queries: {1}'.format(geo, raw_queries))
+        logger.debug('make_item_search_query dump:\ngeo: {}\nraw_queries: {}'.format(geo, raw_queries))
+    else:
+        logger.debug('make_item_search_query dump:\nraw_queries: {}'.format(raw_queries))
 
     return Q(__raw__=raw_queries)

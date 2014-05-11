@@ -9,15 +9,19 @@ from myhoard.apps.collections.items.models import Item
 class GeoLocationField(fields.Raw):
     @staticmethod
     def format(point):
-        return {'lng': point['coordinates'][0], 'lat': point['coordinates'][1]}
+        return {
+            'lng': point['coordinates'][0],
+            'lat': point['coordinates'][1]
+        }
 
 
 class MediaField(fields.Raw):
     @staticmethod
     def format(media_id):
-        return {'id': str(media_id),
-                'url': url_for('mediadetails', media_id=media_id,
-                               _external=True)}
+        return {
+            'id': str(media_id),
+            'url': url_for('mediadetails', media_id=media_id, _external=True)
+        }
 
 
 item_fields = {
@@ -38,7 +42,7 @@ class ItemDetails(Resource):
 
     @staticmethod
     def get(item_id):
-        return Item.objects.get_or_404(id=item_id)
+        return Item.get_visible_or_404(item_id)
 
     @staticmethod
     def put(item_id):

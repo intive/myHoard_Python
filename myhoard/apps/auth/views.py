@@ -1,8 +1,10 @@
-from flask.ext.restful import Resource, fields, marshal_with
-from myhoard.apps.auth.decorators import login_required
 import logging
 
+from flask.ext.restful import Resource, fields, marshal_with
+
+from myhoard.apps.auth.decorators import login_required
 from myhoard.apps.common.utils import get_request_json
+
 from models import User
 
 logger = logging.getLogger(__name__)
@@ -18,7 +20,7 @@ class UserDetails(Resource):
 
     @staticmethod
     def get(user_id):
-        return User.objects.get_or_404(id=user_id)
+        return User.get_visible_or_404(user_id)
 
     @staticmethod
     def put(user_id):
@@ -31,6 +33,7 @@ class UserDetails(Resource):
     @staticmethod
     def delete(user_id):
         User.delete(user_id)
+
         return '', 204
 
 

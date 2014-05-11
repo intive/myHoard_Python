@@ -1,7 +1,7 @@
 import logging
 import re
 
-from werkzeug.exceptions import Unauthorized, Forbidden, NotFound
+from werkzeug.exceptions import HTTPException, Unauthorized, Forbidden, NotFound
 
 from mongoengine import ValidationError, NotUniqueError
 
@@ -40,14 +40,17 @@ _duplicate_re = re.compile(r'\$(.+?)_')
 def handle_custom_errors(e):
     error_type = type(e)
     if error_type in _custom_error_mapping:
-        logger.debug(e) # just typical exception to handle
+        logger.debug(e, exc_info=True)  # just typical exception to handle
 
         error_code, http_code, error_message = _custom_error_mapping[error_type]
 
         resp = {
             'error_code': error_code,
-            'error_message': error_message,
+            'error_message': error_message
         }
+
+        if isinstance(e, HTTPException) and (e.description != e.__class__.description):
+            resp['error_message'] = '{}: {}'.format(error_message, e.description)
 
         if isinstance(e, ValidationError):
             errors = e.to_dict()
@@ -65,7 +68,7 @@ def handle_custom_errors(e):
 
         return resp, http_code
     else:
-        logger.exception(e) # everything is on fire, panic is only solution
+        logger.exception(e)  # everything is on fire, panic is only solution
 
         return {
                    'error_code': 301,

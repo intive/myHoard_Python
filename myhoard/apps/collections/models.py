@@ -1,22 +1,22 @@
-from datetime import datetime
 import logging
+from datetime import datetime
+
+from werkzeug.exceptions import Forbidden, NotFound
 
 from flask import g
 from flask.ext.mongoengine import Document
-from mongoengine import StringField, ListField, ObjectIdField, \
-    DateTimeField, BooleanField
+from mongoengine import Q, StringField, ListField, ObjectIdField, DateTimeField, BooleanField
 
-from myhoard.apps.common.utils import make_order_by_for_query, \
-    make_collection_search_query
+from myhoard.apps.common.utils import make_order_by_for_query, make_collection_search_query
 
 from items.models import Item
+from comments.models import Comment
 
 logger = logging.getLogger(__name__)
 
 
 class Collection(Document):
-    name = StringField(min_length=3, max_length=20, required=True,
-                       unique_with='owner')
+    name = StringField(min_length=3, max_length=20, required=True, unique_with='owner')
     description = StringField(default='')
     tags = ListField(StringField(min_length=3, max_length=20))
     created_date = DateTimeField(default=datetime.now)
@@ -24,12 +24,25 @@ class Collection(Document):
     owner = ObjectIdField()
     public = BooleanField(default=False)
 
-    def __repr__(self):
-        return '<Collection {}>'.format(self.name)
-
     @property
     def items_count(self):
         return Item.objects(collection=self.id).count() if self.id else 0
+
+    def __str__(self):
+        return '<{} {}>'.format(type(self).__name__, self.id)
+
+    @classmethod
+    def get_visible_or_404(cls, collection_id):
+        collection = Collection.objects.get_or_404(Q(id=collection_id) & (Q(owner=g.user) | Q(public=True)))
+
+        logger.debug('get_visible_or_404 dump:\ncollection: {}'.format(collection._data))
+
+        return collection
+
+    @classmethod
+    def get_all(cls, params):
+        return cls.objects(make_collection_search_query(params)).order_by(
+            *make_order_by_for_query(params))
 
     @classmethod
     def create(cls, **kwargs):
@@ -39,18 +52,27 @@ class Collection(Document):
         collection.modified_date = None
         collection.owner = g.user
 
-        return collection.save()
+        collection.save()
+        logger.info('{} created'.format(collection))
+
+        return collection
 
     @classmethod
     def put(cls, collection_id, **kwargs):
-        collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
+        collection = cls.objects.get_or_404(id=collection_id)
+        if collection.owner != g.user:
+            raise Forbidden('Only collection owner can edit collection') if collection.public else NotFound()
+
         update_collection = cls(**kwargs)
 
         return cls.update(collection, update_collection)
 
     @classmethod
     def patch(cls, collection_id, **kwargs):
-        collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
+        collection = cls.objects.get_or_404(id=collection_id)
+        if collection.owner != g.user:
+            raise Forbidden('Only collection owner can edit collection') if collection.public else NotFound()
+
         update_collection = cls()
 
         for field in collection._fields:
@@ -65,26 +87,27 @@ class Collection(Document):
         update_collection.modified_date = None
         update_collection.owner = collection.owner
 
-        return super(cls, update_collection).save()
+        super(cls, update_collection).save()
+        logger.info('{} updated'.format(update_collection))
+
+        return update_collection
 
     @classmethod
     def delete(cls, collection_id):
-        collection = cls.objects.get_or_404(id=collection_id, owner=g.user)
+        collection = cls.objects.get_or_404(id=collection_id)
+        if collection.owner != g.user:
+            raise Forbidden('Only collection owner can delete collection') if collection.public else NotFound()
 
-        super(cls, collection).delete()
+        logger.info('Deleting {} Comments'.format(collection))
+        Comment.delete_from_collection(collection)
+
+        logger.info('Deleting {} Items'.format(collection))
         Item.delete_from_collection(collection)
 
-        return collection
+        super(cls, collection).delete()
+        logger.info('{} deleted'.format(collection))
 
     @classmethod
-    def delete_by_user(cls, user_id):
-        for collection in cls.objects(owner=user_id):
-            logger.debug(
-                'deleting collection... collectionID: {} collection name: {}'
-                .format(collection.id, collection.name))
-            collection.delete(collection.id)
-
-    @classmethod
-    def get_all(cls, params):
-        return cls.objects(make_collection_search_query(params)).order_by(
-            *make_order_by_for_query(params))
+    def delete_from_user(cls, user):
+        for collection_id in cls.objects(owner=user.id).scalar('id'):
+            cls.delete(collection_id)

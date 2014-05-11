@@ -1,4 +1,4 @@
-from flask import abort, Response
+from flask import Response
 from flask.ext.restful import Resource, marshal_with, fields, request
 
 from myhoard.apps.auth.decorators import login_required
@@ -15,19 +15,10 @@ class MediaDetails(Resource):
 
     @staticmethod
     def get(media_id):
-        media = Media.objects.get_or_404(id=media_id)
+        media = Media.get_visible_or_404(media_id)
+        image = Media.get_image_file(media, request.args.get('size'))
 
-        if 'size' in request.args:
-            size = request.args['size']
-            if size in media.images and (size != 'master'):
-                image = media.images[request.args['size']].get()
-            else:
-                abort(404)
-        else:
-            image = media.images['master'].get()
-
-        return Response(image, mimetype='image/' + image.format,
-                        direct_passthrough=True)
+        return Response(image, mimetype='image/' + image.format, direct_passthrough=True)
 
     @staticmethod
     @marshal_with(media_fields)

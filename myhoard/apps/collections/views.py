@@ -1,6 +1,5 @@
-from flask import request, g
+from flask import request
 from flask.ext.restful import Resource, marshal_with, fields
-from mongoengine import Q
 
 from myhoard.apps.common.utils import get_request_json
 from myhoard.apps.auth.decorators import login_required
@@ -30,7 +29,7 @@ class CollectionDetails(Resource):
 
     @staticmethod
     def get(collection_id):
-        return Collection.objects.get_or_404(id=collection_id)
+        return Collection.get_visible_or_404(collection_id)
 
     @staticmethod
     def put(collection_id):
@@ -38,7 +37,7 @@ class CollectionDetails(Resource):
 
     @staticmethod
     def patch(collection_id):
-        return Collection.put(collection_id, **get_request_json())
+        return Collection.patch(collection_id, **get_request_json())
 
     @staticmethod
     def delete(collection_id):
@@ -64,7 +63,7 @@ class CollectionItemList(Resource):
 
     @staticmethod
     def get(collection_id):
-        Collection.objects.get_or_404(Q(id=collection_id) & (Q(owner=g.user) | Q(public=True)))
+        Collection.get_visible_or_404(collection_id)
         return list(Item.get_all(request.values, collection_id))
 
 
@@ -73,7 +72,7 @@ class CollectionCommentList(Resource):
 
     @staticmethod
     def get(collection_id):
-        Collection.objects.get_or_404(id=collection_id)
+        Collection.get_visible_or_404(collection_id)
         return list(Comment.objects(collection=collection_id))
 
 

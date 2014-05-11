@@ -20,6 +20,17 @@ class User(Document):
         'indexes': ['email'],
     }
 
+    def __str__(self):
+        return '<{} {}>'.format(type(self).__name__, self.id)
+
+    @classmethod
+    def get_visible_or_404(cls, user_id):
+        user = cls.objects(id=user_id)
+
+        logger.debug('get_visible_or_404 dump:\nuser: {}'.format(user._data))
+
+        return user
+
     @classmethod
     def create(cls, **kwargs):
         user = cls(**kwargs)
@@ -31,11 +42,17 @@ class User(Document):
         if user.password:
             user.password = generate_password_hash(user.password)
 
-        return user.save()
+        user.save()
+
+        logger.info('{} created'.format(user))
+        return user
 
     @classmethod
     def put(cls, user_id, **kwargs):
         user = cls.objects.get_or_404(id=user_id)
+        if user.id != g.user:
+            raise Forbidden('Only user can edit himself')
+
         update_user = cls(**kwargs)
 
         return cls.update(user, update_user)
@@ -43,6 +60,9 @@ class User(Document):
     @classmethod
     def patch(cls, user_id, **kwargs):
         user = cls.objects.get_or_404(id=user_id)
+        if user.id != g.user:
+            raise Forbidden('Only user can edit himself')
+
         update_user = cls()
 
         for field in user._fields:
@@ -60,22 +80,24 @@ class User(Document):
         if update_user.password:
             update_user.password = generate_password_hash(user.password)
 
-        return update_user.save()
+        update_user.save()
+        logger.info('{} updated'.format(update_user))
+
+        return update_user
 
     @classmethod
     def delete(cls, user_id):
-        user = cls.objects.get_or_404(id=user_id)
-        if g.user != user.id:
-            logger.info('user does not have permission to remove other user')
-            raise Forbidden()
-
-        logger.debug('deleting user collections')
-        Collection.delete_by_user(user.id)
-
-        logger.debug('deleting user tokens')
         from myhoard.apps.auth.oauth.models import Token
 
-        Token.delete_user_tokens(user.id)
+        user = cls.objects.get_or_404(id=user_id)
+        if g.user != user.id:
+            raise Forbidden('Only user can delete himself')
 
-        logger.debug('deleting user')
-        return super(cls, user).delete()
+        logger.info('Deleting {} Tokens'.format(user))
+        Token.delete_from_user(user)
+
+        logger.info('Deleting {} Collections'.format(user))
+        Collection.delete_from_user(user)
+
+        super(cls, user).delete()
+        logger.info('{} deleted'.format(user))
