@@ -77,8 +77,8 @@ class User(Document):
         if not update_user.username:
             update_user.username = update_user.email
 
-        if update_user.password:
-            update_user.password = generate_password_hash(user.password)
+        if user.password != update_user.password:
+            update_user.password = generate_password_hash(update_user.password)
 
         update_user.save()
         logger.info('{} updated'.format(update_user))
