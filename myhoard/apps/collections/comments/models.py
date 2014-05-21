@@ -22,7 +22,7 @@ class Comment(Document):
 
         return bool(Collection.objects(id=self.collection, public=True).count())
 
-    def __str__(self):
+    def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
 
     @classmethod
@@ -46,8 +46,9 @@ class Comment(Document):
         comment.created_date = None
         comment.owner = g.user
 
+        logger.info('Creating {}...'.format(comment))
         comment.save()
-        logger.info('{} created'.format(comment))
+        logger.info('Creating {} done'.format(comment))
 
         return comment
 
@@ -60,11 +61,15 @@ class Comment(Document):
         if (g.user != comment.owner) or (g.user != collection.owner):
             raise Forbidden('Only comment or collection owner can delete comment')
 
+        logger.info('Deleting {}...'.format(comment))
         super(cls, comment).delete()
-        logger.info('{} deleted'.format(comment))
+        logger.info('Deleting {} done'.format(comment))
 
     @classmethod
     def delete_from_collection(cls, collection):
+        logger.info('Deleting {} Comments...'.format(collection))
+
         for comment_id in cls.objects(collection=collection.id).scalar('id'):
             cls.delete(comment_id)
 
+        logger.info('Deleting {} Comments done'.format(collection))

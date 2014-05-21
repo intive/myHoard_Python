@@ -28,7 +28,7 @@ class Collection(Document):
     def items_count(self):
         return Item.objects(collection=self.id).count() if self.id else 0
 
-    def __str__(self):
+    def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
 
     @classmethod
@@ -52,8 +52,9 @@ class Collection(Document):
         collection.modified_date = None
         collection.owner = g.user
 
+        logger.info('Creating {}...'.format(collection))
         collection.save()
-        logger.info('{} created'.format(collection))
+        logger.info('Creating {} done'.format(collection))
 
         return collection
 
@@ -75,7 +76,7 @@ class Collection(Document):
 
         update_collection = cls()
 
-        for field in collection._fields:
+        for field in cls._fields:
             update_collection[field] = kwargs.get(field, collection[field])
 
         return cls.update(collection, update_collection)
@@ -87,8 +88,9 @@ class Collection(Document):
         update_collection.modified_date = None
         update_collection.owner = collection.owner
 
+        logger.info('Updating {}...'.format(update_collection))
         super(cls, update_collection).save()
-        logger.info('{} updated'.format(update_collection))
+        logger.info('Updating {} done'.format(update_collection))
 
         return update_collection
 
@@ -98,16 +100,18 @@ class Collection(Document):
         if collection.owner != g.user:
             raise Forbidden('Only collection owner can delete collection') if collection.public else NotFound()
 
-        logger.info('Deleting {} Comments'.format(collection))
         Comment.delete_from_collection(collection)
-
-        logger.info('Deleting {} Items'.format(collection))
         Item.delete_from_collection(collection)
 
+        logger.info('Deleting {}...'.format(collection))
         super(cls, collection).delete()
-        logger.info('{} deleted'.format(collection))
+        logger.info('Deleting {} done'.format(collection))
 
     @classmethod
     def delete_from_user(cls, user):
+        logger.info('Deleting {} Collections...'.format(user))
+
         for collection_id in cls.objects(owner=user.id).scalar('id'):
             cls.delete(collection_id)
+
+        logger.info('Deleting {} Collections done'.format(user))

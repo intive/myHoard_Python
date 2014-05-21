@@ -25,7 +25,7 @@ class Media(Document):
 
         return bool(Collection.objects(id=self.collection, public=True).count()) if self.collection else True
 
-    def __str__(self):
+    def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
 
     @classmethod
@@ -50,8 +50,11 @@ class Media(Document):
 
         cls.create_image_files(media, image_file)
 
-        logger.info('{} created'.format(media))
-        return media.save()
+        logger.info('Creating {}...'.format(media))
+        media.save()
+        logger.info('Creating {} done'.format(media))
+
+        return media
 
     @classmethod
     def put(cls, media_id, image_file):
@@ -73,8 +76,9 @@ class Media(Document):
 
         cls.create_image_files(media, image_file)
 
+        logger.info('Updating {}...'.format(media))
         media.save()
-        logger.info('{} updated'.format(media))
+        logger.info('Updating {} done'.format(media))
 
         return media
 
@@ -87,22 +91,29 @@ class Media(Document):
         for image in media.images.itervalues():
             image.delete()
 
+        logger.info('Deleting {}...'.format(media))
         super(cls, media).delete()
-        logger.info('{} deleted'.format(media))
+        logger.info('Deleting {} done'.format(media))
 
     @classmethod
     def create_from_item(cls, item):
+        logger.info('Updating {} Media IDs...'.format(item))
+
         for media in cls.objects(id__in=item.media, item__not__exists=True, owner=g.user):
             media.item = item.id
             media.collection = item.collection
 
+            logger.info('Updating {}...'.format(media))
             media.save()
-            logger.info('{} updated'.format(media))
+            logger.info('Updating {} done'.format(media))
 
         item.media = cls.objects(item=item.id).scalar('id')
 
+        logger.info('Updating {}...'.format(item))
         item.save()
-        logger.info('{} media id\'s updated'.format(item))
+        logger.info('Updating {} done'.format(item))
+
+        logger.info('Updating {} Media IDs done'.format(item))
 
     @classmethod
     def delete_from_item(cls, item):

@@ -20,12 +20,12 @@ class User(Document):
         'indexes': ['email'],
     }
 
-    def __str__(self):
+    def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
 
     @classmethod
     def get_visible_or_404(cls, user_id):
-        user = cls.objects(id=user_id)
+        user = cls.objects.get_or_404(id=user_id)
 
         logger.debug('get_visible_or_404 dump:\nuser: {}'.format(user._data))
 
@@ -42,9 +42,10 @@ class User(Document):
         if user.password:
             user.password = generate_password_hash(user.password)
 
+        logger.info('Creating {}...'.format(user))
         user.save()
+        logger.info('Creating {} done'.format(user))
 
-        logger.info('{} created'.format(user))
         return user
 
     @classmethod
@@ -65,7 +66,7 @@ class User(Document):
 
         update_user = cls()
 
-        for field in user._fields:
+        for field in cls._fields:
             update_user[field] = kwargs.get(field, user[field])
 
         return cls.update(user, update_user)
@@ -77,11 +78,14 @@ class User(Document):
         if not update_user.username:
             update_user.username = update_user.email
 
+        update_user.validate()
+
         if user.password != update_user.password:
             update_user.password = generate_password_hash(update_user.password)
 
-        update_user.save()
-        logger.info('{} updated'.format(update_user))
+        logger.info('Updating {}...'.format(update_user))
+        update_user.save(validate=False)
+        logger.info('Updating {} done'.format(update_user))
 
         return update_user
 
@@ -93,11 +97,9 @@ class User(Document):
         if g.user != user.id:
             raise Forbidden('Only user can delete himself')
 
-        logger.info('Deleting {} Tokens'.format(user))
         Token.delete_from_user(user)
-
-        logger.info('Deleting {} Collections'.format(user))
         Collection.delete_from_user(user)
 
+        logger.info('Deleting {}...'.format(user))
         super(cls, user).delete()
-        logger.info('{} deleted'.format(user))
+        logger.info('Deleting {} done'.format(user))

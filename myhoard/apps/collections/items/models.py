@@ -29,7 +29,7 @@ class Item(Document):
 
         return bool(Collection.objects(id=self.collection, public=True).count())
 
-    def __str__(self):
+    def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
 
     @classmethod
@@ -61,10 +61,10 @@ class Item(Document):
                 'coordinates': [item.location.get('lng'), item.location.get('lat')]
             }
 
+        logger.info('Creating {}...'.format(item))
         item.save()
-        logger.info('{} created'.format(item))
+        logger.info('Creating {} done'.format(item))
 
-        logger.info('Updating {} Media'.format(item))
         Media.create_from_item(item)
 
         return item
@@ -87,7 +87,7 @@ class Item(Document):
 
         update_item = cls()
 
-        for field in item._fields:
+        for field in cls._fields:
             update_item[field] = kwargs.get(field, item[field])
 
         return cls.update(item, update_item)
@@ -124,5 +124,9 @@ class Item(Document):
 
     @classmethod
     def delete_from_collection(cls, collection):
+        logger.info('Deleting {} Items...'.format(collection))
+
         for item_id in cls.objects(collection=collection.id).scalar('id'):
             cls.delete(item_id)
+
+        logger.info('Deleting {} Items done'.format(collection))

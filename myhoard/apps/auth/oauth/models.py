@@ -30,7 +30,7 @@ class Token(Document):
         ]
     }
 
-    def __str__(self):
+    def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
 
     @classmethod
@@ -58,8 +58,9 @@ class Token(Document):
         token.refresh_token = uuid4()
         token.owner = user.id
 
+        logger.info('Creating {}...'.format(token))
         token.save()
-        logger.info('{} created'.format(token))
+        logger.info('Creating {} done'.format(token))
 
         return token
 
@@ -92,8 +93,9 @@ class Token(Document):
         update_token.owner = token.owner
         update_token.created = None
 
+        logger.info('Updating {}...'.format(update_token))
         update_token.save()
-        logger.info('{} updated'.format(update_token))
+        logger.info('Updating {} done'.format(update_token))
 
         return update_token
 
@@ -103,10 +105,15 @@ class Token(Document):
         if token.owner != g.user:
             raise Forbidden('Only token owner can delete token')
 
+        logger.info('Deleting {}...'.format(token))
         super(cls, token).delete()
-        logger.info('{} deleted'.format(token))
+        logger.info('Deleting {} done'.format(token))
 
     @classmethod
     def delete_from_user(cls, user):
+        logger.info('Deleting {} Tokens...'.format(user))
+
         for token_id in cls.objects(owner=user.id).scalar('id'):
             cls.delete(token_id)
+
+        logger.info('Deleting {} Tokens done'.format(user))
