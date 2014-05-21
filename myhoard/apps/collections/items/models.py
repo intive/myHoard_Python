@@ -39,7 +39,7 @@ class Item(Document):
         item = cls.objects.get_or_404(id=item_id)
         Collection.get_visible_or_404(item.collection)
 
-        logger.debug('get_visible_or_404 dump:\nitem: {}'.format(item._data))
+        logger.debug('get_visible_or_404 dump:\nitem: {}'.format(getattr(item, '_data')))
 
         return item
 
@@ -49,6 +49,10 @@ class Item(Document):
 
     @classmethod
     def create(cls, **kwargs):
+        from myhoard.apps.collections.models import Collection
+
+        Collection.get_visible_or_404(kwargs.get('collection'))
+
         item = cls(**kwargs)
         item.id = None
         item.created_date = None
@@ -61,7 +65,7 @@ class Item(Document):
                 'coordinates': [item.location.get('lng'), item.location.get('lat')]
             }
 
-        logger.info('Creating {}...'.format(item))
+        logger.info('Creating {} ...'.format(item))
         item.save()
         logger.info('Creating {} done'.format(item))
 
@@ -124,7 +128,7 @@ class Item(Document):
 
     @classmethod
     def delete_from_collection(cls, collection):
-        logger.info('Deleting {} Items...'.format(collection))
+        logger.info('Deleting {} Items ...'.format(collection))
 
         for item_id in cls.objects(collection=collection.id).scalar('id'):
             cls.delete(item_id)

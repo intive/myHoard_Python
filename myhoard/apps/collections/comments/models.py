@@ -32,7 +32,7 @@ class Comment(Document):
         comment = cls.objects.get_or_404(id=comment_id)
         Collection.get_visible_or_404(comment.collection)
 
-        logger.debug('get_visible_or_404 dump:\ncomment: {}'.format(comment._data))
+        logger.debug('get_visible_or_404 dump:\ncomment: {}'.format(getattr(comment, '_data')))
 
         return comment
 
@@ -46,7 +46,7 @@ class Comment(Document):
         comment.created_date = None
         comment.owner = g.user
 
-        logger.info('Creating {}...'.format(comment))
+        logger.info('Creating {} ...'.format(comment))
         comment.save()
         logger.info('Creating {} done'.format(comment))
 
@@ -61,13 +61,13 @@ class Comment(Document):
         if (g.user != comment.owner) or (g.user != collection.owner):
             raise Forbidden('Only comment or collection owner can delete comment')
 
-        logger.info('Deleting {}...'.format(comment))
+        logger.info('Deleting {} ...'.format(comment))
         super(cls, comment).delete()
         logger.info('Deleting {} done'.format(comment))
 
     @classmethod
     def delete_from_collection(cls, collection):
-        logger.info('Deleting {} Comments...'.format(collection))
+        logger.info('Deleting {} Comments ...'.format(collection))
 
         for comment_id in cls.objects(collection=collection.id).scalar('id'):
             cls.delete(comment_id)

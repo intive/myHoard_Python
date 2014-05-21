@@ -27,7 +27,7 @@ class User(Document):
     def get_visible_or_404(cls, user_id):
         user = cls.objects.get_or_404(id=user_id)
 
-        logger.debug('get_visible_or_404 dump:\nuser: {}'.format(user._data))
+        logger.debug('get_visible_or_404 dump:\nuser: {}'.format(getattr(user, '_data')))
 
         return user
 
@@ -42,7 +42,7 @@ class User(Document):
         if user.password:
             user.password = generate_password_hash(user.password)
 
-        logger.info('Creating {}...'.format(user))
+        logger.info('Creating {} ...'.format(user))
         user.save()
         logger.info('Creating {} done'.format(user))
 
@@ -83,7 +83,7 @@ class User(Document):
         if user.password != update_user.password:
             update_user.password = generate_password_hash(update_user.password)
 
-        logger.info('Updating {}...'.format(update_user))
+        logger.info('Updating {} ...'.format(update_user))
         update_user.save(validate=False)
         logger.info('Updating {} done'.format(update_user))
 
@@ -100,6 +100,6 @@ class User(Document):
         Token.delete_from_user(user)
         Collection.delete_from_user(user)
 
-        logger.info('Deleting {}...'.format(user))
+        logger.info('Deleting {} ...'.format(user))
         super(cls, user).delete()
         logger.info('Deleting {} done'.format(user))

@@ -76,7 +76,7 @@ class Media(Document):
 
         cls.create_image_files(media, image_file)
 
-        logger.info('Updating {}...'.format(media))
+        logger.info('Updating {} ...'.format(media))
         media.save()
         logger.info('Updating {} done'.format(media))
 
@@ -91,25 +91,25 @@ class Media(Document):
         for image in media.images.itervalues():
             image.delete()
 
-        logger.info('Deleting {}...'.format(media))
+        logger.info('Deleting {} ...'.format(media))
         super(cls, media).delete()
         logger.info('Deleting {} done'.format(media))
 
     @classmethod
     def create_from_item(cls, item):
-        logger.info('Updating {} Media IDs...'.format(item))
+        logger.info('Updating {} Media IDs ...'.format(item))
 
         for media in cls.objects(id__in=item.media, item__not__exists=True, owner=g.user):
             media.item = item.id
             media.collection = item.collection
 
-            logger.info('Updating {}...'.format(media))
+            logger.info('Updating {} ...'.format(media))
             media.save()
             logger.info('Updating {} done'.format(media))
 
         item.media = cls.objects(item=item.id).scalar('id')
 
-        logger.info('Updating {}...'.format(item))
+        logger.info('Updating {} ...'.format(item))
         item.save()
         logger.info('Updating {} done'.format(item))
 

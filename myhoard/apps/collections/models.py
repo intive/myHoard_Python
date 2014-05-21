@@ -35,7 +35,7 @@ class Collection(Document):
     def get_visible_or_404(cls, collection_id):
         collection = Collection.objects.get_or_404(Q(id=collection_id) & (Q(owner=g.user) | Q(public=True)))
 
-        logger.debug('get_visible_or_404 dump:\ncollection: {}'.format(collection._data))
+        logger.debug('get_visible_or_404 dump:\ncollection: {}'.format(getattr(collection, '_data')))
 
         return collection
 
@@ -52,7 +52,7 @@ class Collection(Document):
         collection.modified_date = None
         collection.owner = g.user
 
-        logger.info('Creating {}...'.format(collection))
+        logger.info('Creating {} ...'.format(collection))
         collection.save()
         logger.info('Creating {} done'.format(collection))
 
@@ -88,7 +88,7 @@ class Collection(Document):
         update_collection.modified_date = None
         update_collection.owner = collection.owner
 
-        logger.info('Updating {}...'.format(update_collection))
+        logger.info('Updating {} ...'.format(update_collection))
         super(cls, update_collection).save()
         logger.info('Updating {} done'.format(update_collection))
 
@@ -103,13 +103,13 @@ class Collection(Document):
         Comment.delete_from_collection(collection)
         Item.delete_from_collection(collection)
 
-        logger.info('Deleting {}...'.format(collection))
+        logger.info('Deleting {} ...'.format(collection))
         super(cls, collection).delete()
         logger.info('Deleting {} done'.format(collection))
 
     @classmethod
     def delete_from_user(cls, user):
-        logger.info('Deleting {} Collections...'.format(user))
+        logger.info('Deleting {} Collections ...'.format(user))
 
         for collection_id in cls.objects(owner=user.id).scalar('id'):
             cls.delete(collection_id)
