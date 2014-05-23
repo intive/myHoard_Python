@@ -46,7 +46,7 @@ class Token(Document):
             raise ValidationError(errors=errors)
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email__iexact=email)
         except DoesNotExist:
             raise UnauthorizedBadCredentials('Login failed')
 
