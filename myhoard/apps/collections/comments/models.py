@@ -1,11 +1,11 @@
 import logging
 from datetime import datetime
 
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from flask import g
 from flask.ext.mongoengine import Document
-from mongoengine import StringField, ObjectIdField, DateTimeField
+from mongoengine import StringField, ObjectIdField, DateTimeField, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,10 @@ class Comment(Document):
     def create(cls, **kwargs):
         from myhoard.apps.collections.models import Collection
 
-        Collection.get_visible_or_404(kwargs.get('collection'))
+        try:
+            Collection.get_visible_or_404(kwargs.get('collection'))
+        except NotFound:
+            raise ValidationError(errors={'collection': 'Not found'})
 
         comment = cls(**kwargs)
         comment.created_date = None

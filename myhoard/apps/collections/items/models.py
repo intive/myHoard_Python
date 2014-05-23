@@ -5,7 +5,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 
 from flask import g
 from flask.ext.mongoengine import Document
-from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, PointField
+from mongoengine import StringField, ListField, ObjectIdField, DateTimeField, PointField, ValidationError
 
 from myhoard.apps.media.models import Media
 from myhoard.apps.common.utils import make_order_by_for_query, make_item_search_query
@@ -51,7 +51,13 @@ class Item(Document):
     def create(cls, **kwargs):
         from myhoard.apps.collections.models import Collection
 
-        Collection.get_visible_or_404(kwargs.get('collection'))
+        try:
+            collection = Collection.get_visible_or_404(kwargs.get('collection'))
+        except NotFound:
+            raise ValidationError(errors={'collection': 'Not found'})
+
+        if collection.owner != g.user:
+            raise ValidationError(errors={'collection': 'No permission to add item in this collection'})
 
         item = cls(**kwargs)
         item.id = None
