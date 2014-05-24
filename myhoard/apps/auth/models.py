@@ -39,11 +39,13 @@ class User(Document):
         if not user.username:
             user.username = user.email
 
+        user.validate()
+
         if user.password:
             user.password = generate_password_hash(user.password)
 
         logger.info('Creating {} ...'.format(user))
-        user.save()
+        user.save(validate=False)
         logger.info('Creating {} done'.format(user))
 
         return user
