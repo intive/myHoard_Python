@@ -1,3 +1,5 @@
+from werkzeug.datastructures import MultiDict
+
 from flask import request
 from flask.ext.restful import Resource, marshal_with, fields
 
@@ -82,4 +84,6 @@ class UserPublicCollectionList(Resource):
     @staticmethod
     def get(user_id):
         User.objects.get_or_404(id=user_id)
-        return list(Collection.objects(owner=user_id, public=True))
+        params = MultiDict(request.values)
+        params.setlist('owner', (user_id,))
+        return list(Collection.get_all(params))

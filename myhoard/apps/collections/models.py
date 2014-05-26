@@ -41,8 +41,7 @@ class Collection(Document):
 
     @classmethod
     def get_all(cls, params):
-        return cls.objects(make_collection_search_query(params)).order_by(
-            *make_order_by_for_query(params))
+        return cls.objects(make_collection_search_query(params)).order_by(*make_order_by_for_query(params))
 
     @classmethod
     def create(cls, **kwargs):
