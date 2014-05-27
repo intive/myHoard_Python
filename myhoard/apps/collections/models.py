@@ -7,7 +7,7 @@ from flask import g
 from flask.ext.mongoengine import Document
 from mongoengine import Q, StringField, ListField, ObjectIdField, DateTimeField, BooleanField
 
-from myhoard.apps.common.utils import make_order_by_for_query, make_collection_search_query
+from myhoard.apps.common.utils import make_order_by_for_query, make_collection_search_query, make_pipeline
 
 from items.models import Item
 from comments.models import Comment
@@ -41,8 +41,8 @@ class Collection(Document):
 
     @classmethod
     def get_all(cls, params):
-        return cls.objects(make_collection_search_query(params)).order_by(
-            *make_order_by_for_query(params))
+        '''raw pymongo aggregation http://docs.mongodb.org/manual/reference/operator/aggregation/'''
+        return cls._get_collection().aggregate(make_pipeline(params)).get('result')
 
     @classmethod
     def create(cls, **kwargs):
