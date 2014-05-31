@@ -43,12 +43,13 @@ def string_to_object_id(string_id):
 def make_order_by_for_query(params):
     '''Returns mongolike sort_by prefixed with directions from given flask params'''
     directions = {'asc': '+', 'desc': '-'}
+    fields_lower = ['name', 'description']
 
     sort_by = params.getlist('sort_by')
     sort_direction = params.get('sort_direction')
 
     direction = directions.get(sort_direction, '+')
-    order_by = [direction + s for s in sort_by]
+    order_by = [direction + s + '_lower' if s in fields_lower else direction + s for s in sort_by]
 
     logger.debug('make_order_by_for_query dump:\norder_by: {}'.format(order_by))
 

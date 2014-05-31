@@ -22,12 +22,20 @@ class Item(Document):
     media = ListField(ObjectIdField())
     collection = ObjectIdField(required=True)
     owner = ObjectIdField()
+    name_lower = StringField(min_length=3, max_length=50, required=True)
+    description_lower = StringField(max_length=250, default='')
 
     @property
     def public(self):
         from myhoard.apps.collections.models import Collection
 
         return bool(Collection.objects(id=self.collection, public=True).count())
+
+    def save(self, *args, **kwargs):
+        self.name_lower = self.name.lower()
+        self.description_lower = self.description.lower()
+
+        return super(Item, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)

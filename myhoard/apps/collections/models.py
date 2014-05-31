@@ -23,10 +23,18 @@ class Collection(Document):
     modified_date = DateTimeField(default=datetime.now)
     owner = ObjectIdField()
     public = BooleanField(default=False)
+    name_lower = StringField(min_length=3, max_length=20, required=True)
+    description_lower = StringField(default='')
 
     @property
     def items_count(self):
         return Item.objects(collection=self.id).count() if self.id else 0
+
+    def save(self, *args, **kwargs):
+        self.name_lower = self.name.lower()
+        self.description_lower = self.description.lower()
+
+        return super(Collection, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return '<{} {}>'.format(type(self).__name__, self.id)
@@ -88,7 +96,7 @@ class Collection(Document):
         update_collection.owner = collection.owner
 
         logger.info('Updating {} ...'.format(update_collection))
-        super(cls, update_collection).save()
+        update_collection.save()
         logger.info('Updating {} done'.format(update_collection))
 
         return update_collection
